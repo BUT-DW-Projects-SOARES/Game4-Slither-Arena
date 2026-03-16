@@ -10,7 +10,7 @@
  * @returns Valeur aléatoire dans [0, max)
  */
 function getRandomInt(max) {
-	return Math.floor(Math.random() * max);
+  return Math.floor(Math.random() * max);
 }
 
 /**
@@ -18,10 +18,10 @@ function getRandomInt(max) {
  * @returns Couleur aléatoire sous forme de chaîne de caractère CSS
  */
 function getRandomColor() {
-	const red = getRandomInt(256);
-	const blue = getRandomInt(256);
-	const green = getRandomInt(256);
-	return 'rgb(' + red + ',' + green + ',' + blue + ')';
+  const red = getRandomInt(256);
+  const blue = getRandomInt(256);
+  const green = getRandomInt(256);
+  return "rgb(" + red + "," + green + "," + blue + ")";
 }
 
 export { getRandomInt, getRandomColor };
