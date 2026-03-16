@@ -42,9 +42,6 @@ export default class Anneau {
         this.i -= 1;
         break; // Gauche
     }
-    const nbCells = 20;
-    this.i = (this.i + nbCells) % nbCells;
-    this.j = (this.j + nbCells) % nbCells;
   }
 
   /**
