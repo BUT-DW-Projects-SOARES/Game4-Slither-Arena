@@ -1,21 +1,71 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="module" src="/src/main.js" defer></script>
-    <title>Serpent Game</title>
     <link
       rel="icon"
+      type="image/svg+xml"
       href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐍</text></svg>"
     />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="/src/main.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Slither Arena</title>
   </head>
   <body>
-    <h1>Serpent Game</h1>
-    <div id="terrain-container">
-      <div id="score-container">Score: <span id="score-val">0</span></div>
-      <canvas id="terrain" width="400" height="400"></canvas>
+    <div class="game-wrapper" id="game-wrapper">
+      <header class="game-header">
+        <h1>🐍 Slither Arena</h1>
+        <div class="header-right">
+          <div id="score-container">
+            <span class="score-label">Score</span>
+            <span id="score-val">0</span>
+          </div>
+          <button id="leaderboard-btn" title="Tableau des scores">🏆</button>
+        </div>
+      </header>
+
+      <div id="terrain-container">
+        <canvas id="terrain" width="600" height="600"></canvas>
+
+        <div id="game-menu-overlay" class="game-overlay">
+          <div class="menu-content">
+            <h2 id="menu-title">Slither Arena</h2>
+            <p id="menu-subtitle">Prêt à jouer ?</p>
+            <div id="menu-score-display" class="hidden">
+              Score final : <span id="menu-score-val">0</span>
+            </div>
+            <button id="menu-action-btn" class="btn-primary">Démarrer</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="game-footer">
+        <div class="controls-hint">
+          <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou <kbd>↑</kbd
+          ><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> pour se déplacer &bull;
+          <kbd>F11</kbd> plein écran
+        </div>
+      </footer>
+    </div>
+
+    <!-- Scoreboard overlay -->
+    <div id="scoreboard-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <div class="overlay-header">
+          <h2>🏆 Meilleurs Scores</h2>
+          <button id="scoreboard-close" class="overlay-close">&times;</button>
+        </div>
+        <ol id="scoreboard-list" class="scoreboard-list"></ol>
+        <button id="scoreboard-clear" class="btn-secondary">
+          Effacer les scores
+        </button>
+      </div>
     </div>
   </body>
 </html>
