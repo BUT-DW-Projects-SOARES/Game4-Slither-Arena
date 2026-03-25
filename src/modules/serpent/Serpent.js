@@ -22,6 +22,8 @@ export default class Serpent {
     this.dead = false;
     /** @type {number|null} Timestamp milliseconde jusqu'auquel le serpent est invincible */
     this.invincibleUntil = null;
+    /** @type {Array} Files d'attente des pulsations de croissance */
+    this.pulses = [];
 
     // Construction du serpent initial
     for (let index = 0; index < longueur; index++) {
@@ -41,69 +43,82 @@ export default class Serpent {
   }
 
   /**
-   * Affiche le serpent sur le canvas.
+   * Affiche le serpent sur le canvas avec l'effet Domino Growth.
    * @param {CanvasRenderingContext2D} ctx - Le contexte 2D.
    * @param {number} taille - Taille de la grille (px).
    */
   draw(ctx, taille) {
     if (this.anneaux.length === 0) return;
 
-    ctx.lineWidth = taille * 0.8;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    const now = performance.now();
+    const isInv = this.isInvincible(now);
 
-    const isInv = this.isInvincible();
+    // Nettoyage des vieux pulses
+    this.pulses = this.pulses.filter(
+      (p) => now - p.startTime < this.anneaux.length * 100 + 500,
+    );
 
-    // Dessin du corps
-    if (this.anneaux.length > 1) {
-      if (isInv) {
-        ctx.strokeStyle = COLORS.powerup;
-        ctx.shadowColor = COLORS.powerup;
-        ctx.shadowBlur = 10 + Math.sin(Date.now() / 60) * 10;
+    // Dessin du corps segment par segment pour permettre le scaling individuel
+    for (let k = this.anneaux.length - 1; k >= 0; k--) {
+      const a = this.anneaux[k];
+      const cx = a.i * taille + taille / 2;
+      const cy = a.j * taille + taille / 2;
+
+      // Calcul du scale "Domino"
+      let scale = 1.0;
+      this.pulses.forEach((p) => {
+        const delay = k * 80; // Délai par segment pour l'effet domino
+        const elapsed = now - (p.startTime + delay);
+        if (elapsed > 0 && elapsed < 400) {
+          // Courbe de croissance fluide
+          scale += Math.sin((elapsed / 400) * Math.PI) * 0.6;
+        }
+      });
+
+      if (k === 0) {
+        // Tête
+        if (isInv) {
+          ctx.fillStyle = COLORS.powerup;
+          ctx.shadowColor = COLORS.powerup;
+          ctx.shadowBlur = 15;
+        } else {
+          ctx.fillStyle = a.couleur || COLORS.snakeHead;
+          ctx.shadowBlur = 0;
+        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, taille * 0.45 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Yeux
+        this._drawEyes(ctx, cx, cy, taille * scale);
       } else {
-        ctx.strokeStyle = this.anneaux[1].couleur || COLORS.snakeBody;
+        // Corps
+        if (isInv) {
+          ctx.fillStyle = COLORS.powerup;
+          ctx.shadowColor = COLORS.powerup;
+          ctx.shadowBlur = 10 + Math.sin(now / 60) * 10;
+        } else {
+          ctx.fillStyle = a.couleur || COLORS.snakeBody;
+          ctx.shadowBlur = 0;
+        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, taille * 0.4 * scale, 0, Math.PI * 2);
+        ctx.fill();
         ctx.shadowBlur = 0;
       }
-
-      ctx.beginPath();
-
-      const queue = this.anneaux[this.anneaux.length - 1];
-      ctx.moveTo(queue.i * taille + taille / 2, queue.j * taille + taille / 2);
-
-      for (let k = this.anneaux.length - 2; k >= 0; k--) {
-        const a = this.anneaux[k];
-        ctx.lineTo(a.i * taille + taille / 2, a.j * taille + taille / 2);
-      }
-      ctx.stroke();
-      ctx.shadowBlur = 0; // reset
     }
+  }
 
-    // Dessin de la tête
-    const tete = this.anneaux[0];
-    const hx = tete.i * taille + taille / 2;
-    const hy = tete.j * taille + taille / 2;
-
-    if (isInv) {
-      ctx.fillStyle = COLORS.powerup;
-      ctx.shadowColor = COLORS.powerup;
-      ctx.shadowBlur = 15;
-    } else {
-      ctx.fillStyle = tete.couleur || COLORS.snakeHead;
-      ctx.shadowBlur = 0;
-    }
-
-    ctx.beginPath();
-    ctx.arc(hx, hy, taille * 0.45, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Ajout des yeux asymétriques selon la direction
+  /**
+   * Dessine les yeux sur la tête.
+   */
+  _drawEyes(ctx, hx, hy, taille) {
     const eyeRadius = taille * 0.12;
-    const eyeOffset = taille * 0.22; // Écartement latéral depuis le centre
-    const eyeDist = taille * 0.15; // Avancée sur le museau
+    const eyeOffset = taille * 0.22;
+    const eyeDist = taille * 0.15;
 
     let e1x, e1y, e2x, e2y;
-    // Traduction de la direction : 0: haut, 1: droite, 2: bas, 3: gauche
     if (this.direction === 0) {
       e1x = hx - eyeOffset;
       e1y = hy - eyeDist;
@@ -126,7 +141,6 @@ export default class Serpent {
       e2y = hy + eyeOffset;
     }
 
-    // Globules blancs
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
     ctx.arc(e1x, e1y, eyeRadius, 0, Math.PI * 2);
@@ -135,7 +149,6 @@ export default class Serpent {
     ctx.arc(e2x, e2y, eyeRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Pupilles
     ctx.fillStyle = "#111827";
     ctx.beginPath();
     ctx.arc(e1x, e1y, eyeRadius * 0.5, 0, Math.PI * 2);
@@ -172,6 +185,9 @@ export default class Serpent {
       COLORS.snakeTail,
     );
     this.anneaux.push(nouvelleQueue);
+
+    // Déclencher une pulsation de croissance
+    this.pulses.push({ startTime: performance.now() });
   }
 
   /**

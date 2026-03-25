@@ -1,6 +1,9 @@
-import { getRandomInt } from "../../utils.js";
 import Serpent from "./Serpent.js";
-import { nbCells } from "../../constants.js";
+import {
+  nbCells,
+  COLORS as GAME_COLORS,
+  GAME_CONFIG,
+} from "../../constants.js";
 
 /**
  * Sous-classe intelligente paramétrant un serpent piloté par algorithme (IA).
@@ -8,85 +11,170 @@ import { nbCells } from "../../constants.js";
  * Hérite entièrement du rendu visuel et de la motorisation de la classe parente Serpent.
  */
 export default class SerpentAI extends Serpent {
-  /**
-   * Détermine le prochain mouvement de l'IA de manière rudimentaire.
-   * Évalue le danger d'obstacles muraux immédiats et applique un léger taux d'inflexion aléatoire du parcours.
-   * Ne possède pas (encore) de `pathfinding` (A*) strict vers la pomme ou d'évitement des autres serpents.
-   */
-  planNextMove() {
-    const tete = this.anneaux[0];
-    let nextI = tete.i;
-    let nextJ = tete.j;
+  constructor(longueur, i, j, direction) {
+    super(longueur, i, j, direction);
+    /** @type {number} Direction actuelle du mouvement */
+    this.direction = direction;
+    // Les IA sont rouges par convention visuelle
+    this.anneaux.forEach((a, idx) => {
+      if (idx === 0) a.couleur = GAME_COLORS.redIA;
+      else a.couleur = GAME_COLORS.redIABody;
+    });
 
-    // Simulation virtuelle anticipée du prochain emplacement théorique
-    switch (this.direction) {
-      case 0:
-        nextJ -= 1;
-        break; // Haut
-      case 1:
-        nextI += 1;
-        break; // Droite
-      case 2:
-        nextJ += 1;
-        break; // Bas
-      case 3:
-        nextI -= 1;
-        break; // Gauche
+    /** @type {number} Temps de vie en ms (disparaît après 30s) */
+    this.spawnTime = performance.now();
+    this.lifespan = GAME_CONFIG.AI_LIFESPAN;
+
+    /** @type {boolean} Si l'IA est en mode 'rush' pour une pomme */
+    this.isRushing = false;
+  }
+
+  /**
+   * IA Complexe : Évite le joueur et les murs, et ne 'rush' les pommes qu'occasionnellement.
+   * @param {Item[]} items - Liste des objets présents sur le terrain.
+   * @param {Serpent[]} allSerpents - Liste de tous les serpents (pour l'esquive).
+   */
+  planNextMove(items = [], allSerpents = []) {
+    const tete = this.anneaux[0];
+
+    // 1. Gestion de l'état (Rush vs Wander)
+    if (!this.isRushing && Math.random() < 0.05) {
+      this.isRushing = true; // 5% de chance de passer en mode Rush
+    } else if (this.isRushing && Math.random() < 0.2) {
+      this.isRushing = false; // 20% de chance d'arrêter le Rush après chaque pas
     }
 
-    // Calcul de l'imminence stricte d'un crash hors limites
-    const isHittingWall =
-      nextI < 0 || nextI >= nbCells || nextJ < 0 || nextJ >= nbCells;
+    let idealDir = this.direction;
 
-    // Stratégie réactive :
-    // - Changement forcé de trajectoire si crash sur un mur imminent
-    // - 20% de chances de changement de trajectoire par pure entropie locale "naturelle"
-    if (isHittingWall || getRandomInt(10) < 2) {
-      const validDirections = [];
+    if (this.isRushing) {
+      // MODE RUSH    // 1. Chercher l'objet le plus proche (priorité au PowerUp)
+      const powerUps = items.filter((it) => it.type === "powerup");
+      const apples = items.filter((it) => it.type === "apple");
 
-      for (let d = 0; d < 4; d++) {
-        // Validation basique conditionnelle interdisant un demi-tour brutal
-        if (Math.abs(this.direction - d) === 2) continue;
+      // Si on rush, on vise le powerup en priorité s'il existe, sinon la pomme
+      const targets = powerUps.length > 0 ? powerUps : apples;
+      let target = null;
+      let minDist = Infinity;
 
-        let testI = tete.i;
-        let testJ = tete.j;
-
-        // Simulation des vecteurs résiduels
-        switch (d) {
-          case 0:
-            testJ -= 1;
-            break; // Haut
-          case 1:
-            testI += 1;
-            break; // Droite
-          case 2:
-            testJ += 1;
-            break; // Bas
-          case 3:
-            testI -= 1;
-            break; // Gauche
+      targets.forEach((item) => {
+        const dist = Math.abs(item.i - tete.i) + Math.abs(item.j - tete.j);
+        if (dist < minDist) {
+          minDist = dist;
+          target = item;
         }
+      });
 
-        // On ne conserve que les vecteurs n'amendant pas à l'anéantissement hors grille
-        if (testI >= 0 && testI < nbCells && testJ >= 0 && testJ < nbCells) {
-          validDirections.push(d);
+      if (target) {
+        const di = target.i - tete.i;
+        const dj = target.j - tete.j;
+        if (Math.abs(di) > Math.abs(dj)) {
+          idealDir = di > 0 ? 1 : 3;
+        } else if (dj !== 0) {
+          idealDir = dj > 0 ? 2 : 0;
         }
       }
-
-      // Pivote formellement la direction algorithmique actuelle du bot
-      if (validDirections.length > 0) {
-        this.direction =
-          validDirections[Math.floor(Math.random() * validDirections.length)];
+    } else {
+      // MODE WANDER : On bouge un peu au hasard mais on évite le danger
+      if (Math.random() < 0.1) {
+        // Change de direction aléatoirement de temps en temps
+        idealDir = Math.floor(Math.random() * 4);
       }
+    }
+
+    // Interdire le demi-tour immédiat
+    if (Math.abs(idealDir - this.direction) === 2) {
+      idealDir = this.direction;
+    }
+
+    // 2. Validation de la direction (Évitement murs + JOUEUR + POMMES si wander)
+    if (this._isDirectionDangerous(idealDir, tete, allSerpents, items)) {
+      this.direction = this._getSafeDirection(tete, allSerpents, items);
+    } else {
+      this.direction = idealDir;
     }
   }
 
   /**
-   * Surcharge synchrone du moteur temporel de déplacement initial.
-   * Fait appel en cascade à l'algorithme de pivot du bot avant application motrice super().
+   * Vérifie si une direction mène à une danger (mur, serpent, ou pomme si on wander).
    */
-  move() {
-    this.planNextMove();
-    super.move(); // L'amorce parente lance l'onde de cascade de déplacement du corps
+  _isDirectionDangerous(dir, tete, allSerpents, items) {
+    let nextI = tete.i;
+    let nextJ = tete.j;
+    switch (dir) {
+      case 0:
+        nextJ--;
+        break;
+      case 1:
+        nextI++;
+        break;
+      case 2:
+        nextJ++;
+        break;
+      case 3:
+        nextI--;
+        break;
+    }
+
+    // Mur
+    if (nextI < 0 || nextI >= nbCells || nextJ < 0 || nextJ >= nbCells)
+      return true;
+
+    // Autre serpent (Joueur)
+    for (const s of allSerpents) {
+      if (s === this) continue;
+      if (s.anneaux.some((a) => a.i === nextI && a.j === nextJ)) return true;
+    }
+
+    // Éviter les pommes si on ne rush pas
+    if (!this.isRushing) {
+      if (items.some((it) => it.i === nextI && it.j === nextJ)) return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Trouve une direction qui ne mène pas à un mur, au joueur ou à une pomme (si wander).
+   */
+  _getSafeDirection(tete, allSerpents, items) {
+    const validDirections = [];
+    for (let d = 0; d < 4; d++) {
+      if (Math.abs(this.direction - d) === 2) continue; // Pas de demi-tour
+      if (!this._isDirectionDangerous(d, tete, allSerpents, items)) {
+        validDirections.push(d);
+      }
+    }
+
+    if (validDirections.length > 0) {
+      return validDirections[
+        Math.floor(Math.random() * validDirections.length)
+      ];
+    }
+    return this.direction;
+  }
+
+  /**
+   * Vérifie si l'IA a dépassé son temps de vie.
+   */
+  isExpired(timestamp) {
+    return timestamp - this.spawnTime > this.lifespan;
+  }
+
+  move(items, allSerpents) {
+    // L'IA est un peu plus lente : elle peut "sauter" un cycle de mouvement
+    if (Math.random() > GAME_CONFIG.AI_MOVE_CHANCE) return;
+
+    this.planNextMove(items, allSerpents);
+    super.move();
+  }
+
+  /**
+   * Surcharge de la croissance pour l'IA : devient entièrement rouge vif quand elle mange.
+   */
+  extend() {
+    super.extend();
+    this.anneaux.forEach((a) => {
+      a.couleur = GAME_COLORS.redIA;
+    });
   }
 }

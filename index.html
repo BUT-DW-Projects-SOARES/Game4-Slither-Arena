@@ -22,6 +22,10 @@
       <header class="game-header">
         <h1>🐍 Slither Arena</h1>
         <div class="header-right">
+          <div id="speed-container">
+            <span class="speed-label">Vitesse</span>
+            <span id="speed-val">1.0x</span>
+          </div>
           <div id="score-container">
             <span class="score-label">Score</span>
             <span id="score-val">0</span>
@@ -40,19 +44,24 @@
             <div id="menu-score-display" class="hidden">
               Score final : <span id="menu-score-val">0</span>
             </div>
-            <button id="menu-action-btn" class="btn-primary">Démarrer</button>
+            <div class="menu-buttons">
+              <button id="menu-action-btn" class="btn-primary">Démarrer</button>
+              <button id="menu-restart-btn" class="btn-primary hidden">Recommencer</button>
+            </div>
           </div>
         </div>
       </div>
 
       <footer class="game-footer">
         <div class="controls-hint">
-          <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou <kbd>↑</kbd
-          ><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> pour se déplacer &bull;
-          <kbd>F11</kbd> plein écran
+          <div>
+            <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou 
+            <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> pour se déplacer
+          </div>
+          <div>
+          <kbd>F11</kbd> plein écran <kbd>P</kbd> pause <kbd>R</kbd> recommencer
+          </div>
         </div>
-      </footer>
-    </div>
 
     <!-- Scoreboard overlay -->
     <div id="scoreboard-overlay" class="overlay hidden">

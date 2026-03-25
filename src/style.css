@@ -30,11 +30,17 @@
   --canvas-snake-tail: var(--primary-light);
   --canvas-apple: var(--accent);
   --canvas-powerup: #fbbf24;
+  --canvas-ia: #ef4444;
+  --canvas-ia-body: #991b1b;
   --canvas-grid: rgba(255, 255, 255, 0.04);
 }
 
 * {
   box-sizing: border-box;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* --- Base --- */
@@ -83,7 +89,8 @@ h1 {
   letter-spacing: 0.5px;
 }
 
-#score-container {
+#score-container,
+#speed-container {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -94,7 +101,8 @@ h1 {
   box-shadow: 0 2px 8px var(--shadow);
 }
 
-.score-label {
+.score-label,
+.speed-label {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -107,6 +115,14 @@ h1 {
   font-weight: 800;
   color: var(--primary);
   min-width: 2ch;
+  text-align: right;
+}
+
+#speed-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fbbf24; /* Yellow for speed */
+  min-width: 4ch;
   text-align: right;
 }
 
@@ -183,6 +199,13 @@ canvas {
   transform: translateY(20px) scale(0.95);
 }
 
+.menu-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
 #menu-title {
   font-size: 3.5rem;
   font-weight: 800;
@@ -231,18 +254,17 @@ canvas {
 
 .game-footer {
   width: 600px;
-  text-align: center;
+  margin-top: 1rem;
 }
 
 .controls-hint {
   font-size: 0.78rem;
   color: var(--text-muted);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-  line-height: 2;
+  gap: 0.6rem;
+  line-height: 1.5;
 }
 
 kbd {

@@ -8,22 +8,38 @@ const styles = getComputedStyle(document.documentElement);
 /**
  * Palette de couleurs extraite des propriétés CSS du document.
  * @type {Object}
- * @property {string} snakeHead - Couleur de la tête du serpent.
- * @property {string} snakeBody - Couleur du corps du serpent.
- * @property {string} snakeTail - Couleur de la queue du serpent.
- * @property {string} apple - Couleur des pommes.
- * @property {string} powerup - Couleur des powerups.
- * @property {string} grid - Couleur des points de la grille.
  */
 export const COLORS = {
   snakeHead: styles.getPropertyValue("--canvas-snake-head").trim() || "#16a34a",
   snakeBody: styles.getPropertyValue("--canvas-snake-body").trim() || "#4ade80",
   snakeTail: styles.getPropertyValue("--canvas-snake-tail").trim() || "#86efac",
   apple: styles.getPropertyValue("--canvas-apple").trim() || "#f43f5e",
+  redIA: styles.getPropertyValue("--canvas-ia").trim() || "#ef4444",
+  redIABody: styles.getPropertyValue("--canvas-ia-body").trim() || "#991b1b",
   powerup: styles.getPropertyValue("--canvas-powerup").trim() || "#fbbf24",
-  grid:
-    styles.getPropertyValue("--canvas-grid").trim() ||
-    "rgba(255, 255, 255, 0.04)",
+  canvasGrid: styles.getPropertyValue("--canvas-grid").trim() || "#000000",
+};
+
+/**
+ * Configuration globale du gameplay pour un équilibrage facile.
+ */
+export const GAME_CONFIG = {
+  FPS_INITIAL: 10,
+  FPS_MAX: 20,
+  SCORE_FOR_SPEED_INCREASE: 12, // Progression plus lente (était 5)
+
+  AI_SPAWN_SCORE_INTERVAL: 10,
+  AI_LIFESPAN: 30000,
+  AI_MOVE_CHANCE: 0.75, // L'IA bouge 75% du temps (plus lente que joueur)
+  AI_RANDOM_MOVE_CHANCE: 0.25, // 25% de chance de mouvement aléatoire
+
+  POWERUP_SPAWN_CHANCE: 0.05, // 5% par check si IA présente (environ 1 chance sur 2 par sec)
+  POWERUP_DURATION: 8000, // 8s d'invincibilité
+
+  SCORE_POWERUP: 5,
+  SCORE_APPLE: 1,
+  SCORE_AI_PENALTY: -1,
+  SCORE_KILL_AI: 5,
 };
 
 /** @type {number} Taille d'une cellule de la grille en pixels */
@@ -34,4 +50,3 @@ export const nbCells = 30;
 
 /** @type {number} Taille totale du canvas en pixels CSS */
 export const CSS_SIZE = 600;
-
