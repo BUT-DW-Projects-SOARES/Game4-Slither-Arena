@@ -70,11 +70,22 @@ export default class ItemManager {
    * @param {number} nbCells - Le nombre de cellules sur la grille.
    */
   constructor(nbCells) {
-    /** @type {number} Dimension de la grille */
+    /**
+     * Dimension de la grille (côté).
+     * @type {number}
+     */
     this.nbCells = nbCells;
-    /** @type {Item[]} Collection des objets actifs sur le terrain */
+
+    /**
+     * Collection des objets actifs sur le terrain.
+     * @type {Item[]}
+     */
     this.items = [];
-    /** @type {Object[]} Collection des particules visuelles actives */
+
+    /**
+     * Collection des particules visuelles actives (effets d'explosion).
+     * @type {Array<{x: number, y: number, vx: number, vy: number, life: number, decay: number, color: string}>}
+     */
     this.particles = [];
   }
 

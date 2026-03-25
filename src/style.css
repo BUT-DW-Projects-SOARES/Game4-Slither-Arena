@@ -37,6 +37,159 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Désactive le highlight sur mobile */
+}
+
+/* --- Mobile Only --- */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .mobile-only {
+    display: flex;
+  }
+
+  .game-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .header-right {
+    flex-wrap: wrap; /* Permet aux scores de passer sur 2 lignes si besoin */
+    gap: 0.4rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  #speed-container,
+  #score-container {
+    padding: 0.35rem 0.6rem;
+    gap: 0.4rem;
+  }
+
+  .score-label,
+  .speed-label {
+    display: none; /* Cache "SCORE" et "VITESSE" pour gagner de la place */
+  }
+
+  h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .game-wrapper {
+    padding: 0.25rem 0.25rem 0.5rem 0.25rem;
+    gap: 0.25rem;
+    width: 100vw;
+    height: 100%;
+    max-height: 100vh;
+    overflow: hidden; /* Blocage total du scroll */
+  }
+
+  #terrain-container {
+    width: 92vw;
+    height: 92vw;
+    max-width: 340px;
+    max-height: 340px;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .overlay-card {
+    width: 95vw !important;
+    min-width: unset !important; /* Enlève le min-width de 340px */
+    padding: 1rem !important;
+    max-height: 80vh;
+  }
+
+  .menu-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100% !important;
+    padding: 0.75rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  #menu-title {
+    font-size: 1.75rem !important;
+  }
+
+  /* Correction fullscreen mobile */
+  .game-wrapper:fullscreen .game-header,
+  .game-wrapper:-webkit-full-screen .game-header {
+    width: 100% !important;
+  }
+}
+
+/* --- D-Pad Styles (Croix Clavier) --- */
+#mobile-controls {
+  display: none;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.75rem; /* Remonte juste ce qu'il faut sans déborder */
+  justify-content: center;
+  z-index: 20;
+}
+
+@media (max-width: 650px) {
+  #mobile-controls {
+    display: flex;
+  }
+}
+
+.dpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 55px);
+  grid-template-rows: repeat(2, 55px);
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.dpad-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 4px 10px var(--shadow);
+  user-select: none;
+  transition:
+    transform 0.1s,
+    background 0.1s;
+}
+
+.dpad-spacer {
+  width: 55px;
+  height: 55px;
+}
+
+.dpad-btn:active,
+.dpad-btn.is-active {
+  background: var(--primary) !important;
+  color: var(--bg-dark) !important;
+  transform: scale(0.9);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hidden {
@@ -45,14 +198,22 @@
 
 /* --- Base --- */
 
+html,
 body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  background-color: var(--bg-dark);
+}
+
+body {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   font-family: "Outfit", system-ui, sans-serif;
-  background-color: var(--bg-dark);
   color: var(--text);
 }
 
@@ -62,8 +223,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 2rem;
   padding: 2rem;
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* --- Header --- */
@@ -93,12 +258,14 @@ h1 {
 #speed-container {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center; /* Force le centrage du contenu */
+  gap: 0.5rem;
   background: var(--bg-card);
-  padding: 0.55rem 1.2rem;
+  padding: 0.55rem 1rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: 0 2px 8px var(--shadow);
+  min-width: 80px; /* Assure une largeur minimale consistante */
 }
 
 .score-label,
@@ -114,19 +281,18 @@ h1 {
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--primary);
-  min-width: 2ch;
-  text-align: right;
+  text-align: center;
 }
 
 #speed-val {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #fbbf24; /* Yellow for speed */
-  min-width: 4ch;
-  text-align: right;
+  color: #fbbf24;
+  text-align: center;
 }
 
-#leaderboard-btn {
+#leaderboard-btn,
+.icon-btn {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -138,7 +304,8 @@ h1 {
   line-height: 1;
 }
 
-#leaderboard-btn:hover {
+#leaderboard-btn:hover,
+.icon-btn:hover {
   background: var(--border);
   transform: translateY(-1px);
 }
@@ -321,6 +488,19 @@ kbd {
     inset 0 -1px 0 rgba(0, 0, 0, 0.15);
 }
 
+#menu-debug-btn {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  min-width: 140px;
+}
+
+#menu-debug-btn.active {
+  background: #10b981;
+  color: var(--bg-dark);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
 .btn-secondary {
   margin-top: 1rem;
   padding: 8px 20px;
@@ -461,6 +641,37 @@ kbd {
   padding: 2rem 0;
 }
 
+.info-content h3 {
+  margin: 1.5rem 0 0.75rem 0;
+  font-size: 1rem;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.info-content h3:first-child {
+  margin-top: 0;
+}
+
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.info-list li:last-child {
+  border-bottom: none;
+}
+
 /* --- Fullscreen support --- */
 
 .game-wrapper:fullscreen,
@@ -483,5 +694,5 @@ kbd {
 .game-wrapper:-webkit-full-screen .game-header,
 .game-wrapper:fullscreen .game-footer,
 .game-wrapper:-webkit-full-screen .game-footer {
-  width: 600px;
+  width: min(600px, 95vw);
 }

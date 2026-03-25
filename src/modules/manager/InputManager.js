@@ -9,6 +9,16 @@ export default class InputManager {
   }
 
   /**
+   * Ajoute une direction à la file d'attente.
+   * @param {number} dir - Direction (0:Haut, 1:Droite, 2:Bas, 3:Gauche).
+   */
+  addDirection(dir) {
+    if (dir >= 0 && dir <= 3) {
+      this.directionQueue.push(dir);
+    }
+  }
+
+  /**
    * Initialise les écouteurs d'événements clavier.
    * @private
    */
@@ -17,6 +27,7 @@ export default class InputManager {
       let nouvelleDirection = -1;
       switch (event.key.toLowerCase()) {
         case "z":
+        case "w": // Ajout support WASD complet
         case "arrowup":
           nouvelleDirection = 0; // Haut
           break;
@@ -29,13 +40,14 @@ export default class InputManager {
           nouvelleDirection = 2; // Bas
           break;
         case "q":
+        case "a": // Ajout support WASD complet
         case "arrowleft":
           nouvelleDirection = 3; // Gauche
           break;
       }
 
       if (nouvelleDirection !== -1) {
-        this.directionQueue.push(nouvelleDirection);
+        this.addDirection(nouvelleDirection);
       }
     });
   }

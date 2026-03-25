@@ -17,7 +17,7 @@
     />
     <title>Slither Arena</title>
   </head>
-  <body>
+  <body ontouchstart="">
     <div class="game-wrapper" id="game-wrapper">
       <header class="game-header">
         <h1>🐍 Slither Arena</h1>
@@ -30,7 +30,8 @@
             <span class="score-label">Score</span>
             <span id="score-val">0</span>
           </div>
-          <button id="leaderboard-btn" title="Tableau des scores">🏆</button>
+          <button id="info-btn" class="icon-btn" title="Aide (I)">ℹ️</button>
+          <button id="leaderboard-btn" title="Scores">🏆</button>
         </div>
       </header>
 
@@ -46,22 +47,62 @@
             </div>
             <div class="menu-buttons">
               <button id="menu-action-btn" class="btn-primary">Démarrer</button>
+              <button id="menu-debug-btn" class="btn-primary hidden">Debug</button>
               <button id="menu-restart-btn" class="btn-primary hidden">Recommencer</button>
             </div>
           </div>
         </div>
+      </div> <!-- Fin terrain-container -->
+
+      <!-- Contrôles Mobile (Croix Directionnelle) -->
+      <div id="mobile-controls">
+          <div class="dpad-grid">
+              <div class="dpad-spacer"></div>
+              <button id="btn-up" class="dpad-btn">▲</button>
+              <div class="dpad-spacer"></div>
+              <button id="btn-left" class="dpad-btn">◀</button>
+              <button id="btn-down" class="dpad-btn">▼</button>
+              <button id="btn-right" class="dpad-btn">▶</button>
+          </div>
       </div>
 
-      <footer class="game-footer">
-        <div class="controls-hint">
-          <div>
-            <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou 
-            <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> pour se déplacer
-          </div>
-          <div>
-          <kbd>F11</kbd> plein écran <kbd>P</kbd> pause <kbd>R</kbd> recommencer
-          </div>
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="overlay hidden">
+        <div class="overlay-card">
+            <h2 id="confirm-title">Confirmation</h2>
+            <p id="confirm-message">Voulez-vous vraiment recommencer ?</p>
+            <div class="menu-buttons">
+                <button id="confirm-yes-btn" class="btn-primary" style="padding: 12px 24px; font-size: 1rem;">Oui</button>
+                <button id="confirm-no-btn" class="btn-secondary">Annuler</button>
+            </div>
         </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="overlay hidden">
+        <div class="overlay-card" style="max-width: 500px; text-align: left;">
+            <div class="overlay-header">
+                <h2>Comment jouer</h2>
+                <button id="info-close" class="overlay-close">&times;</button>
+            </div>
+            <div class="info-content">
+                <h3>Contrôles</h3>
+                <ul class="info-list">
+                    <li><kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd> : Se déplacer</li>
+                    <li><kbd>P</kbd> : Pause / Menu</li>
+                    <li><kbd>R</kbd> : Recommencer</li>
+                    <li><kbd>I</kbd> : Aide / Infos</li>
+                </ul>
+                <h3>Règles</h3>
+                <ul class="info-list">
+                    <li>Mangez les <span style="color: var(--accent); font-weight: bold;">Pommes</span> pour grandir.</li>
+                    <li>Les <span style="color: var(--canvas-powerup); font-weight: bold;">Power-Ups</span> vous rendent invincible et permettent de traverser les murs !</li>
+                    <li>Évitez de vous percuter ou de percuter les adversaires.</li>
+                    <li>Les IAs deviennent plus agressives à mesure que vous progressez.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <!-- Scoreboard overlay -->
     <div id="scoreboard-overlay" class="overlay hidden">

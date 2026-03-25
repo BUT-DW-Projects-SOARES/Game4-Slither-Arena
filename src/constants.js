@@ -24,14 +24,14 @@ export const COLORS = {
  * Configuration globale du gameplay pour un équilibrage facile.
  */
 export const GAME_CONFIG = {
+  DEBUG_MODE: true, // Active les logs de présentation dans la console
   FPS_INITIAL: 10,
   FPS_MAX: 20,
   SCORE_FOR_SPEED_INCREASE: 12, // Progression plus lente (était 5)
 
-  AI_SPAWN_SCORE_INTERVAL: 10,
-  AI_LIFESPAN: 30000,
-  AI_MOVE_CHANCE: 0.75, // L'IA bouge 75% du temps (plus lente que joueur)
-  AI_RANDOM_MOVE_CHANCE: 0.25, // 25% de chance de mouvement aléatoire
+  AI_SPAWN_SCORE_INTERVAL: 10, // Rétabli à 10 selon souhait utilisateur
+  AI_MOVE_CHANCE: 0.9, // Plus rapide (90% du temps, était 75%)
+  AI_RANDOM_MOVE_CHANCE: 0.35, // Plus imprévisible (était 25%)
 
   POWERUP_SPAWN_CHANCE: 0.05, // 5% par check si IA présente (environ 1 chance sur 2 par sec)
   POWERUP_DURATION: 8000, // 8s d'invincibilité

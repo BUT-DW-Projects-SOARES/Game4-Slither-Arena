@@ -67,16 +67,13 @@ export default class GameEngine {
         this.togglePause();
       }
 
+      if (key === "i") {
+        this.ui.showInfo();
+      }
+
       if (key === "r") {
         if (this.gameRunning && !this.isPaused) {
-          // Warning si en pleine partie
-          const verify = confirm(
-            "Voulez-vous vraiment recommencer la partie ?",
-          );
-          if (verify) {
-            this.ui.hideMenu();
-            this.startGame();
-          }
+          this.ui.showConfirm();
         } else if (this.ui.isMenuVisible() || !this.gameRunning) {
           // Direct si menu visible ou game over
           this.ui.hideMenu();
@@ -85,7 +82,10 @@ export default class GameEngine {
       }
     });
 
-    // Boutons scoreboard
+    document
+      .getElementById("info-btn")
+      .addEventListener("click", () => this.ui.showInfo());
+
     document
       .getElementById("leaderboard-btn")
       .addEventListener("click", () => this.scoreManager.show());
@@ -100,6 +100,82 @@ export default class GameEngine {
       .addEventListener("click", (e) => {
         if (e.target.id === "scoreboard-overlay") this.scoreManager.hide();
       });
+
+    // Bouton Debug
+    this.ui.menuDebugBtn.addEventListener("click", () => {
+      GAME_CONFIG.DEBUG_MODE = !GAME_CONFIG.DEBUG_MODE;
+      this.ui.updateDebugButton(GAME_CONFIG.DEBUG_MODE);
+      console.log(
+        `%c[SYSTEM] Mode Debug : ${GAME_CONFIG.DEBUG_MODE ? "ACTIVÉ" : "DÉSACTIVÉ"}`,
+        "color: #3b82f6; font-weight: bold;",
+      );
+    });
+
+    // Contrôles Mobile (D-Pad)
+    const setupMobileBtn = (id, dir) => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        const addActive = () => btn.classList.add("is-active");
+        const removeActive = () => btn.classList.remove("is-active");
+
+        btn.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            addActive();
+            this.inputManager.addDirection(dir);
+          },
+          { passive: false },
+        );
+
+        btn.addEventListener(
+          "touchend",
+          (e) => {
+            e.preventDefault();
+            removeActive();
+          },
+          { passive: false },
+        );
+
+        btn.addEventListener("touchcancel", removeActive);
+
+        // Fallback Mouse
+        btn.addEventListener("mousedown", addActive);
+        btn.addEventListener("mouseup", removeActive);
+        btn.addEventListener("mouseleave", removeActive);
+        btn.addEventListener("click", () =>
+          this.inputManager.addDirection(dir),
+        );
+      }
+    };
+
+    setupMobileBtn("btn-up", 0);
+    setupMobileBtn("btn-right", 1);
+    setupMobileBtn("btn-down", 2);
+    setupMobileBtn("btn-left", 3);
+
+    // Modaux de confirmation et info
+    this.ui.confirmYesBtn.addEventListener("click", () => {
+      this.ui.hideConfirm();
+      this.ui.hideMenu();
+      this.startGame();
+    });
+
+    this.ui.confirmNoBtn.addEventListener("click", () => {
+      this.ui.hideConfirm();
+    });
+
+    this.ui.infoCloseBtn.addEventListener("click", () => {
+      this.ui.hideInfo();
+    });
+
+    // Fermeture par overlay
+    this.ui.confirmOverlay.addEventListener("click", (e) => {
+      if (e.target.id === "confirm-modal") this.ui.hideConfirm();
+    });
+    this.ui.infoOverlay.addEventListener("click", (e) => {
+      if (e.target.id === "info-modal") this.ui.hideInfo();
+    });
   }
 
   togglePause() {
@@ -112,6 +188,7 @@ export default class GameEngine {
         this.score,
         "Continuer",
         true,
+        false, // showDebug: masqué en cours de partie selon le souhait utilisateur
       );
     } else {
       this.ui.hideMenu();
@@ -119,7 +196,17 @@ export default class GameEngine {
     }
   }
 
+  /**
+   * Démarre une nouvelle partie.
+   * Réinitialise le score, la vitesse, le terrain et spawn le serpent du joueur.
+   */
   startGame() {
+    if (GAME_CONFIG.DEBUG_MODE)
+      console.info(
+        "%c[GAME] Démarrage d'une nouvelle partie",
+        "color: #10b981; font-weight: bold;",
+      );
+
     this.score = 0;
     this.fps = GAME_CONFIG.FPS_INITIAL;
     this.MOVE_INTERVAL = 1000 / this.fps;
@@ -139,22 +226,36 @@ export default class GameEngine {
     this.animationFrameId = requestAnimationFrame((t) => this.gameLoop(t));
   }
 
+  /**
+   * Arrête le jeu et affiche l'écran de fin.
+   * @param {string} message - Raison de la fin de partie (ex: "Collision !").
+   */
   gameOver(message) {
+    if (GAME_CONFIG.DEBUG_MODE)
+      console.warn(
+        `%c[GAME OVER] ${message} | Score final: ${this.score}`,
+        "color: #f43f5e; font-weight: bold;",
+      );
+
     this.gameRunning = false;
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     if (this.score > 0) this.scoreManager.saveScore(this.score);
-    // showRestart is false by default in showMenu
     this.ui.showMenu("Game Over", message, true, this.score, "Rejouer", false);
   }
 
+  /**
+   * Mise à jour de la logique de jeu à chaque cycle.
+   * Gère les inputs, les mouvements, les collisions et les spawns.
+   * @param {number} timestamp - Temps de jeu milliseconde.
+   */
   updateLogic(timestamp) {
     if (this.isPaused) return;
 
-    // 1. Inputs
+    // 1. INPUTS : Lecture de la prochaine direction demandée par le joueur.
     const nextDir = this.inputManager.getNextDirection(this.joueur.direction);
     if (nextDir !== null) this.joueur.direction = nextDir;
 
-    // 2. Mouvements & Collisions fatales
+    // 2. MOUVEMENTS & COLLISIONS FATALES
     for (const s of this.serpents) {
       if (s instanceof SerpentAI) s.move(this.itemManager.items, this.serpents);
       else s.move();
@@ -167,7 +268,7 @@ export default class GameEngine {
         return;
     }
 
-    // 3. Collecte d'items
+    // 3. COLLECTE D'ITEMS : Consommation des pommes et power-ups.
     const scoreState = { score: this.score };
     this.serpents.forEach((s) => {
       this.collisionSystem.handleItemCollection(
@@ -179,7 +280,7 @@ export default class GameEngine {
       );
     });
 
-    // Sync score et progressive difficulty
+    // Synchronisation du score et augmentation progressive de la difficulté (vitesse).
     if (scoreState.score !== this.score) {
       this.score = scoreState.score;
       this.fps = Math.min(
@@ -189,14 +290,18 @@ export default class GameEngine {
       );
       this.MOVE_INTERVAL = 1000 / this.fps;
       this.ui.updateHUD(this.score, this.fps);
+      if (GAME_CONFIG.DEBUG_MODE)
+        console.log(`IA: Score MAJ -> ${this.score} | FPS -> ${this.fps}`);
     }
 
-    // 4. Spawns (AI)
+    // 4. SPAWNS D'IA : Apparition d'adversaires selon le score.
     if (
       this.score > 0 &&
       this.score % GAME_CONFIG.AI_SPAWN_SCORE_INTERVAL === 0 &&
       !this._lastAISpawnScore
     ) {
+      if (GAME_CONFIG.DEBUG_MODE)
+        console.log("%c[SPAWN] Nouvelle IA générée !", "color: #fbbf24;");
       this.spawnSystem.spawnNewAI(this.serpents);
       this._lastAISpawnScore = this.score;
     } else if (this.score % GAME_CONFIG.AI_SPAWN_SCORE_INTERVAL !== 0) {
@@ -205,7 +310,7 @@ export default class GameEngine {
 
     this.spawnSystem.checkSpawns(this.score, this.serpents, timestamp);
 
-    // 5. Cleanup
+    // 5. NETTOYAGE : Suppression des IA mortes ou expirées.
     this.serpents = this.serpents.filter((s) => !s.dead || s === this.joueur);
   }
 

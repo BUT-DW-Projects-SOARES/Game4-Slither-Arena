@@ -6,23 +6,39 @@ import { nbCells, GAME_CONFIG } from "../../constants.js";
  * Gère l'apparition programmée des objets et des adversaires.
  */
 export default class SpawnSystem {
+  /**
+   * Initialise le système d'apparition.
+   * @param {ItemManager} itemManager - Gestionnaire pour le placement physique des items.
+   */
   constructor(itemManager) {
     this.itemManager = itemManager;
   }
 
   /**
-   * Vérifie et déclenche les spawns selon le score et l'état actuel.
+   * Analyse l'état du jeu pour décider s'il faut faire apparaître des objets spéciaux.
+   * Un PowerUp n'apparaît que si au moins une IA est présente sur le terrain.
+   * @param {number} score - Score actuel du joueur.
+   * @param {Serpent[]} serpents - Liste des serpents actifs.
    */
   checkSpawns(score, serpents) {
     const hasAI = serpents.some((s) => s instanceof SerpentAI && !s.dead);
     const hasPU = this.itemManager.items.some((it) => it.type === "powerup");
 
-    // Spawn rare PowerUp si IA présente
+    // Apparition aléatoire et rare du PowerUp d'invincibilité si une menace (IA) existe.
     if (hasAI && !hasPU && Math.random() < GAME_CONFIG.POWERUP_SPAWN_CHANCE) {
+      if (GAME_CONFIG.DEBUG_MODE)
+        console.info(
+          "%c[SPAWN] Un PowerUp est apparu sur la grille !",
+          "color: #fbbf24;",
+        );
       this.itemManager.spawnItem("powerup", serpents);
     }
   }
 
+  /**
+   * Génère une nouvelle IA ennemie à une position et direction aléatoire.
+   * @param {Serpent[]} serpents - Liste des serpents auxquels ajouter l'adversaire.
+   */
   spawnNewAI(serpents) {
     serpents.push(
       new SerpentAI(
@@ -34,6 +50,10 @@ export default class SpawnSystem {
     );
   }
 
+  /**
+   * Place les objets initiaux au démarrage du jeu (Typiquement la première pomme).
+   * @param {Serpent[]} serpents - Liste des serpents pour éviter les collisions au spawn.
+   */
   spawnInitialItems(serpents) {
     this.itemManager.spawnItem("apple", serpents);
   }

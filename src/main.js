@@ -1,6 +1,6 @@
 import "./style.css";
 import GameEngine from "./modules/GameEngine.js";
-import { CSS_SIZE } from "./constants.js";
+import { CSS_SIZE, GAME_CONFIG } from "./constants.js";
 
 /**
  * Point d'entrée principal de Slither Arena.
@@ -41,4 +41,13 @@ window.addEventListener("keydown", (event) => {
 });
 
 // Lancement initial (affichage du menu)
-engine.showMenu("Slither Arena", "Prêt à jouer ?", false);
+engine.ui.showMenu(
+  "Slither Arena",
+  "Prêt à jouer ?",
+  false,
+  0,
+  "Démarrer",
+  false,
+  true,
+);
+engine.ui.updateDebugButton(GAME_CONFIG.DEBUG_MODE);

@@ -1,5 +1,5 @@
 import Anneau from "./Anneau.js";
-import { COLORS } from "../../constants.js";
+import { COLORS, nbCells } from "../../constants.js";
 
 /**
  * Entité représentant un serpent sur la grille.
@@ -9,20 +9,40 @@ export default class Serpent {
   /**
    * Crée un nouveau serpent à une position donnée avec une longueur initiale.
    * @param {number} longueur - Nombre de segments initiaux (tête + corps).
-   * @param {number} i - L'indice de colonne (axe X) initial de la tête.
-   * @param {number} j - L'indice de ligne (axe Y) initial de la tête.
+   * @param {number} i - L'indice de colonne (axe X) initial de la tête sur la grille.
+   * @param {number} j - L'indice de ligne (axe Y) initial de la tête sur la grille.
    * @param {number} direction - Direction initiale (0:Haut, 1:Droite, 2:Bas, 3:Gauche).
    */
   constructor(longueur, i, j, direction) {
-    /** @type {Anneau[]} Liste chronologique des segments, de la tête [0] à la queue [n] */
+    /**
+     * Liste chronologique des segments, de la tête [0] à la queue [n].
+     * @type {Anneau[]}
+     */
     this.anneaux = [];
-    /** @type {number} Direction actuelle du mouvement (0:Haut, 1:Droite, 2:Bas, 3:Gauche) */
+
+    /**
+     * Direction actuelle du mouvement (0:Haut, 1:Droite, 2:Bas, 3:Gauche).
+     * @type {number}
+     */
     this.direction = direction;
-    /** @type {boolean} État de survie du serpent (utilisé pour le nettoyage des IA) */
+
+    /**
+     * État de survie du serpent (utilisé pour le cycle de vie des IA et le Game Over).
+     * @type {boolean}
+     */
     this.dead = false;
-    /** @type {number|null} Timestamp milliseconde jusqu'auquel le serpent est invincible */
+
+    /**
+     * Timestamp (performance.now()) indiquant la fin de l'effet d'invincibilité.
+     * @type {number|null}
+     */
     this.invincibleUntil = null;
-    /** @type {Array} Files d'attente des pulsations de croissance */
+
+    /**
+     * File d'attente des animations de pulsation de croissance (Domino Effect).
+     * Chaque objet contient un startTime.
+     * @type {Array<{startTime: number}>}
+     */
     this.pulses = [];
 
     // Construction du serpent initial
@@ -159,15 +179,25 @@ export default class Serpent {
   }
 
   /**
-   * Fait avancer le serpent d'une case de façon incrémentale.
-   * La queue suit le corps chronologiquement depuis l'arrière.
+   * Fait avancer le serpent d'une case.
+   * Si le serpent est invincible, il peut traverser les murs (Wrapping).
    */
   move() {
     for (let k = this.anneaux.length - 1; k > 0; k--) {
       this.anneaux[k].copy(this.anneaux[k - 1]);
     }
-    // Application de la direction finale sur l'anneau d'amorce
+
+    // Deplacement de la tête
     this.anneaux[0].move(this.direction);
+
+    // Effet "Fantôme" (Wrapping) si invincible
+    if (this.isInvincible()) {
+      if (this.anneaux[0].i < 0) this.anneaux[0].i = nbCells - 1;
+      else if (this.anneaux[0].i >= nbCells) this.anneaux[0].i = 0;
+
+      if (this.anneaux[0].j < 0) this.anneaux[0].j = nbCells - 1;
+      else if (this.anneaux[0].j >= nbCells) this.anneaux[0].j = 0;
+    }
   }
 
   /**
@@ -210,6 +240,7 @@ export default class Serpent {
    * @returns {boolean} True si le serpent sort du périmètre de jeu.
    */
   checkWallCollision(nbCells) {
+    if (this.isInvincible()) return false;
     const tete = this.anneaux[0];
     return tete.i < 0 || tete.i >= nbCells || tete.j < 0 || tete.j >= nbCells;
   }
