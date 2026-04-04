@@ -18,7 +18,7 @@ Fonctionnalites principales:
 - PowerUp d'invincibilite temporaire
 - Effets visuels Canvas (particules, pulsations)
 - Scoreboard persistant via localStorage
-- Compatibilite clavier et mobile (D-Pad tactile)
+- Compatibilite clavier et mobile (fleches, ZQSD/WASD, D-Pad tactile)
 
 ---
 
@@ -100,6 +100,12 @@ Installation:
 npm install
 ```
 
+Alternative pnpm:
+
+```bash
+pnpm install
+```
+
 Execution dev:
 
 ```bash
@@ -116,7 +122,7 @@ npm run preview
 Checks avant demo:
 
 1. Demarrage sans erreur bloquante
-2. Controles clavier OK
+2. Controles clavier (fleches, ZQSD/WASD, P/R/I) OK
 3. D-Pad mobile OK
 4. Scoreboard sauvegarde/restauration OK
 

@@ -2,7 +2,7 @@
 
 Ce document constitue la documentation technique de référence du projet Slither Arena. Il couvre l'intégralité de l'architecture, le détail de chaque module, les algorithmes utilisés, le travail de refactorisation effectué, et un script pour la soutenance orale.
 
-**Version du dossier** : 1.1  
+**Version du dossier** : 1.2  
 **Dernière vérification** : 2026-04-04  
 **Périmètre validé** : `Game4-Slither-Arena/` (branche `main`)
 
@@ -137,7 +137,7 @@ flowchart TD
 - Configure le rendu **HiDPI** : le canvas est redimensionné à `CSS_SIZE * devicePixelRatio` pour être net sur les écrans Retina, puis rescalé via `ctx.scale(dpr, dpr)`.
 - Instancie le `GameEngine` avec le canvas.
 - Affiche le menu d'accueil via `engine.ui.showMenu()`.
-- Écoute la touche `F11` pour basculer en plein écran via l'API `Fullscreen`.
+- Écoute la touche `F11` pour tenter le plein écran via l'API `Fullscreen` (selon navigateur, OS et permissions).
 
 ---
 
@@ -274,7 +274,7 @@ C'est le résultat du refactoring majeur du projet.
 
 - **`keyMap`** : Objet dictionnaire mappant les touches clavier vers des directions numériques. Supporte ZQSD (FR), WASD (EN) et les flèches directionnelles.
 - **`directionQueue`** : File d'attente des directions. Permet de "buffer" les entrées rapides sans en perdre.
-- **`actions`** : Map de callbacks pour les touches non-directionnelles (P=Pause, I=Info, R=Restart).
+- **`actions`** : Map de callbacks pour les touches non-directionnelles (P=Pause, I=Info, R=Restart, B=Debug).
 
 **Méthodes** :
 
@@ -289,7 +289,7 @@ Reçoit les références aux systèmes (`ui`, `state`, `input`, `score`) et aux 
 
 **`_initUI()`** : Lie chaque bouton HTML à son action via une fonction utilitaire `bind(id, fn)`. Gère le bouton principal du menu (Démarrer/Reprendre selon l'état), les boutons de restart, d'info, de leaderboard, de confirmation. Implémente aussi la fermeture par clic sur l'overlay.
 
-**`_initKeyboard()`** : Utilise `InputManager.registerAction()` pour lier P → Pause, I → Info, R → Restart/Relancer.
+**`_initKeyboard()`** : Utilise `InputManager.registerAction()` pour lier P → Pause, I → Info, R → Restart/Relancer, B → Debug.
 
 **`_initMobile()`** : Configure le D-Pad. Pour chaque bouton directionnel (up/right/down/left), attache des listeners `touchstart`, `mousedown`, `touchend`, `mouseup`, `mouseleave`. Ajoute une classe CSS `is-active` pour le feedback visuel tactile. Appelle `input.addDirection(dir)` pour injecter la direction dans la file. Le fallback `click` est volontairement absent pour éviter les doubles entrées.
 
@@ -423,7 +423,7 @@ Le fichier HTML contient :
 - L'**overlay de menu** (titre, sous-titre, score final, boutons Démarrer/Debug/Restart).
 - Le **D-Pad mobile** : grille 3×2 avec boutons ▲▼◀▶, visible uniquement sur petits écrans.
 - La **modale de confirmation** (Oui/Annuler pour le restart).
-- La **modale d'info** (contrôles ZQSD/flèches, touches P/R/I, règles du jeu).
+- La **modale d'info** (flèches directionnelles, touches P/R/I, règles du jeu).
 - L'**overlay scoreboard** (liste ordonnée des meilleurs scores, bouton effacer).
 
 ---
@@ -451,17 +451,17 @@ Le fichier HTML contient :
 
 ### Introduction (1 min)
 
-"Bonjour. Je vous présente Slither Arena, un jeu Snake moderne développé en JavaScript ES6 avec l'API Canvas. L'objectif du projet était double : créer une expérience de jeu fluide et responsive, tout en mettant en pratique une architecture logicielle modulaire et maintenable."
+"Bonjour. Je vous présente Slither Arena, un jeu Snake moderne développé en JavaScript ES2022+ avec l'API Canvas. L'objectif du projet était double : créer une expérience de jeu fluide et responsive, tout en mettant en pratique une architecture logicielle modulaire et maintenable."
 
 ### Architecture (2 min)
 
-"Le cœur du projet est le GameEngine, un orchestrateur qui ne fait aucun calcul lui-même. Il délègue la physique au CollisionSystem, le temps au Ticker, et le rendu au Renderer. Cette séparation des responsabilités m'a permis d'ajouter des fonctionnalités complexes — comme une IA prédictive et un système de PowerUps — sans jamais altérer la logique de base.
+"Le cœur du projet est le GameEngine, un orchestrateur qui ne fait aucun calcul lui-même. Il délègue la physique au CollisionSystem, le temps au Ticker, et le rendu au Renderer. Cette séparation des responsabilités m'a permis d'ajouter des fonctionnalités complexes, comme une IA comportementale à états et un système de PowerUps, sans altérer la logique de base.
 
 Par exemple, le Ticker sépare la vitesse de simulation de la vitesse d'affichage, ce qui garantit un gameplay identique sur un écran 60Hz et un écran 144Hz."
 
 ### Refactoring et POO (2 min)
 
-"J'ai effectué une refonte majeure des contrôles. J'ai centralisé la gestion du clavier dans un InputManager qui utilise un mapping d'actions. Cela permet d'enregistrer des raccourcis clavier en une seule ligne : `input.registerAction('p', callback)`. J'ai aussi encapsulé le changement de direction du serpent dans une méthode dédiée `changeDir`, conformément aux exigences du TP2 et aux principes de la POO."
+"J'ai effectué une refonte majeure des contrôles. J'ai centralisé la gestion du clavier dans un InputManager qui utilise un mapping d'actions. Cela permet d'enregistrer des raccourcis clavier en une seule ligne : `input.registerAction('p', callback)`. Les actions principales sont P, I, R, avec un raccourci B pour le debug. J'ai aussi encapsulé le changement de direction du serpent dans une méthode dédiée `changeDir`, conformément aux exigences du TP2 et aux principes de la POO."
 
 ### Mobile et Finalité (1 min)
 
