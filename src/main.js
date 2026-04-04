@@ -55,8 +55,6 @@ engine.ui.showMenu({
   subtitle: 'Prêt à relever le défi ?',
   showScore: false,
   btnText: "Démarrer l'Aventure",
-  showInput: false,
-  isGameOver: false,
   showDebug: true,
 });
 

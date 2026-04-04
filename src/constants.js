@@ -18,6 +18,8 @@ export const COLORS = {
   redIABody: styles.getPropertyValue('--canvas-ia-body').trim() || '#991b1b',
   powerup: styles.getPropertyValue('--canvas-powerup').trim() || '#fbbf24',
   canvasGrid: styles.getPropertyValue('--canvas-grid').trim() || '#000000',
+  terrainRock: styles.getPropertyValue('--canvas-rock').trim() || '#334155',
+  terrainBorder: styles.getPropertyValue('--canvas-border').trim() || '#475569',
   eyeWhite: styles.getPropertyValue('--canvas-eye-white').trim() || '#ffffff',
   eyePupil: styles.getPropertyValue('--canvas-eye-pupil').trim() || '#111827',
 };

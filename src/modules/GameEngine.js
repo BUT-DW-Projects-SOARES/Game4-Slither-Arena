@@ -11,6 +11,7 @@ import GameState from './logic/GameState.js';
 import Renderer from './logic/Renderer.js';
 import Ticker from './logic/Ticker.js';
 import EntityManager from './logic/EntityManager.js';
+import Terrain from './logic/Terrain.js';
 import { GAME_CONFIG, LOG_COLORS, NB_CELLS } from '../constants.js';
 
 /**
@@ -30,9 +31,10 @@ export default class GameEngine {
 
     // 1. Initialisation des Systèmes
     this.state = new GameState();
-    this.renderer = new Renderer(this.ctx);
+    this.terrain = new Terrain(NB_CELLS);
+    this.renderer = new Renderer(this.ctx, this.terrain);
     this.ui = new UIManager();
-    this.itemManager = new ItemManager(NB_CELLS);
+    this.itemManager = new ItemManager(NB_CELLS, this.terrain);
     this.input = new InputManager();
     this.score = new ScoreManager();
     this.entities = new EntityManager();
@@ -77,9 +79,11 @@ export default class GameEngine {
    */
   startGame() {
     this.state.reset();
+    this.terrain.reset();
     this.itemManager.reset();
     this.input.reset();
     this.entities.init(new Serpent(2, 15, 15, 1));
+    this.terrain.syncSnakes(this.entities.getAlive());
 
     this.ui.updateHUD(this.state.score, this.state.fps);
     this.spawnSystem.spawnInitialItems(this.entities.serpents);
@@ -157,16 +161,18 @@ export default class GameEngine {
       }
     }
 
-    // 3. Collectes, Difficulté et Spawns
-    this._runSystems(timestamp);
+    // 3. Cleanup + Synchronisation Terrain
+    this.entities.cleanup();
+    this.terrain.syncSnakes(this.entities.getAlive());
 
-    // 4. Debugging
+    // 4. Collectes, Difficulté et Spawns
+    this._runSystems(timestamp);
+    this.terrain.syncSnakes(this.entities.getAlive());
+
+    // 5. Debugging
     if (GAME_CONFIG.DEBUG_MODE && timestamp % 2000 < this.state.moveInterval) {
       this._logDebug();
     }
-
-    // 5. Cleanup
-    this.entities.cleanup();
   }
 
   /**

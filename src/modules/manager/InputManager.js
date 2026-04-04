@@ -62,6 +62,9 @@ export default class InputManager {
 
       // 1. Gestion des directions
       if (this.keyMap[key] !== undefined) {
+        if (key.startsWith('arrow')) {
+          event.preventDefault();
+        }
         this.addDirection(this.keyMap[key]);
         return;
       }

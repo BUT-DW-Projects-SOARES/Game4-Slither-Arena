@@ -1,4 +1,5 @@
 import { COLORS, TAILLE_CELLULE, CSS_SIZE } from '../../constants.js';
+import { TERRAIN_CODES } from './Terrain.js';
 
 /**
  * Gère le rendu graphique complet du jeu sur le canvas.
@@ -7,10 +8,13 @@ import { COLORS, TAILLE_CELLULE, CSS_SIZE } from '../../constants.js';
 export default class Renderer {
   /**
    * @param {CanvasRenderingContext2D} ctx - Le contexte 2D du canvas.
+   * @param {Terrain|null} terrain - Terrain 2D a dessiner.
    */
-  constructor(ctx) {
+  constructor(ctx, terrain = null) {
     /** @type {CanvasRenderingContext2D} */
     this.ctx = ctx;
+    /** @type {Terrain|null} */
+    this.terrain = terrain;
   }
 
   /**
@@ -31,6 +35,29 @@ export default class Renderer {
   }
 
   /**
+   * Dessine les obstacles et bordures issus de la matrice de terrain.
+   * @private
+   */
+  _drawTerrain() {
+    if (!this.terrain) return;
+
+    for (let j = 0; j < this.terrain.size; j++) {
+      for (let i = 0; i < this.terrain.size; i++) {
+        const cell = this.terrain.getCell(i, j);
+        if (cell === TERRAIN_CODES.ROCK) {
+          this.ctx.fillStyle = COLORS.terrainRock;
+          this.ctx.fillRect(
+            i * TAILLE_CELLULE + 1,
+            j * TAILLE_CELLULE + 1,
+            TAILLE_CELLULE - 2,
+            TAILLE_CELLULE - 2,
+          );
+        }
+      }
+    }
+  }
+
+  /**
    * Dessine l'ensemble des éléments de jeu.
    * @param {GameState} state - L'état actuel du jeu.
    * @param {ItemManager} itemManager - Gestionnaire d'objets.
@@ -39,6 +66,7 @@ export default class Renderer {
    */
   render(state, itemManager, serpents, timestamp = Date.now()) {
     this.clear();
+    this._drawTerrain();
 
     // 1. Rendu des items et particules
     itemManager.updateAndDraw(this.ctx, timestamp);

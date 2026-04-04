@@ -82,13 +82,16 @@ export class Item {
 export default class ItemManager {
   /**
    * @param {number} NB_CELLS - Le nombre de cellules sur la grille.
+   * @param {Terrain|null} terrain - Terrain 2D pour eviter les obstacles au spawn.
    */
-  constructor(NB_CELLS) {
+  constructor(NB_CELLS, terrain = null) {
     /**
      * Dimension de la grille (côté).
      * @type {number}
      */
     this.NB_CELLS = NB_CELLS;
+    /** @type {Terrain|null} */
+    this.terrain = terrain;
 
     /**
      * Collection des objets actifs sur le terrain.
@@ -129,6 +132,10 @@ export default class ItemManager {
       this.items.forEach((item) => {
         if (item.i === x && item.j === y) collision = true;
       });
+
+      if (this.terrain && !this.terrain.isSpawnableCell(x, y)) {
+        collision = true;
+      }
 
       attempts++;
       if (attempts > 500) break;
