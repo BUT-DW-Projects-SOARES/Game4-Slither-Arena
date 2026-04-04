@@ -32,7 +32,7 @@ export default class GameEngine {
     // 1. Initialisation des Systèmes
     this.state = new GameState();
     this.terrain = new Terrain(NB_CELLS);
-    this.renderer = new Renderer(this.ctx, this.terrain);
+    this.renderer = new Renderer(this.ctx);
     this.ui = new UIManager();
     this.itemManager = new ItemManager(NB_CELLS, this.terrain);
     this.input = new InputManager();
@@ -185,6 +185,7 @@ export default class GameEngine {
     this.entities.serpents.forEach((s) => {
       this.collisionSystem.handleItemCollection(
         s,
+        this.entities.serpents,
         this.entities.joueur,
         this.itemManager,
         scoreState,

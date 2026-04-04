@@ -35,6 +35,7 @@ Scripts NPM:
 - npm run dev
 - npm run build
 - npm run preview
+- npm run lint
 
 ---
 
@@ -63,6 +64,7 @@ flowchart LR
 
 - main.js: bootstrap, canvas HiDPI, lancement moteur
 - GameEngine.js: boucle logique, pause, game over, orchestration
+- Terrain.js: grille 2D d'occupation des cellules par les serpents
 - Ticker.js: cadence logique + rendu fluide
 - CollisionSystem.js: murs, auto-collision, collisions inter-serpents, items
 - SpawnSystem.js: apparition IA et powerups
@@ -131,7 +133,7 @@ Points forts:
 Limites:
 
 - Pas de tests automatises integres
-- Pas de script lint expose dans package.json
+- Script lint disponible, mais pas de tests automatises executes en CI
 - Aleatoire non seedee pour reproduire une partie a l'identique
 
 ---

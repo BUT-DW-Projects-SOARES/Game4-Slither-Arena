@@ -24,8 +24,8 @@ Ce document constitue la documentation technique de référence du projet Slithe
 12. [Travaux de Refactorisation](#12-travaux-de-refactorisation)
 13. [Script de Présentation Orale](#13-script-de-présentation-orale)
 14. [Exploitation et Runbook](#14-exploitation-et-runbook)
-15. [Qualité, Tests et Limites](#15-qualite-tests-et-limites)
-16. [Maintenance et Évolution](#16-maintenance-et-evolution)
+15. [Qualité, Tests et Limites](#15-qualité-tests-et-limites)
+16. [Maintenance et Évolution](#16-maintenance-et-évolution)
 
 ---
 
@@ -68,6 +68,7 @@ Game4-Slither-Arena/
         │   ├── Ticker.js            # Boucle de jeu et gestion du delta-time
         │   ├── GameState.js         # État d'une session (score, difficulté, pause)
         │   ├── EntityManager.js     # Registre des serpents (joueur + IA)
+        │   ├── Terrain.js           # Grille 2D d'occupation des cellules
         │   ├── SpawnSystem.js       # Algorithme d'apparition des IA et PowerUps
         │   ├── CollisionSystem.js   # Détection et résolution de toutes les collisions
         │   └── Renderer.js          # Pipeline de rendu Canvas (grille, items, serpents)
@@ -95,7 +96,7 @@ Le `GameEngine` ne fait aucun calcul lui-même. Il ne dessine rien, ne détecte 
 
 ### Les 3 Couches
 
-- **Logic** : Simulation pure. Aucune référence au DOM. Contient le temps (`Ticker`), la physique (`CollisionSystem`), le spawn (`SpawnSystem`), l'état (`GameState`), le registre des entités (`EntityManager`) et le rendu (`Renderer`).
+- **Logic** : Simulation pure. Aucune référence au DOM. Contient le temps (`Ticker`), la physique (`CollisionSystem`), le spawn (`SpawnSystem`), l'état (`GameState`), le registre des entités (`EntityManager`), la grille d'occupation (`Terrain`) et le rendu (`Renderer`).
 - **Manager** : Interface entre le code et le monde extérieur (DOM, clavier, écran tactile, localStorage).
 - **Entity (serpent/)** : Les objets "vivants" du jeu. Gèrent leur propre état, leur propre mouvement et leur propre rendu.
 
@@ -103,7 +104,7 @@ Le `GameEngine` ne fait aucun calcul lui-même. Il ne dessine rien, ne détecte 
 
 1. Le `Ticker` appelle `requestAnimationFrame` en boucle.
 2. Si suffisamment de temps s'est écoulé (delta >= intervalle), il appelle `onTick` → `GameEngine.updateLogic()`.
-3. `updateLogic()` récupère la direction du joueur via `InputManager`, déplace tous les serpents, vérifie les collisions via `CollisionSystem`, gère la collecte d'items, et nettoie les entités mortes.
+3. `updateLogic()` récupère la direction du joueur via `InputManager`, déplace tous les serpents, vérifie les collisions via `CollisionSystem`, nettoie les entités mortes, synchronise la grille d'occupation (`Terrain`), puis gère la collecte d'items et les spawns.
 4. À chaque frame (même sans tick logique), il appelle `onRender` → `Renderer.render()` qui efface le canvas, dessine la grille, les items, les particules, puis les serpents.
 
 ### Schéma d'Orchestration (Mermaid)
@@ -150,35 +151,36 @@ Orchestrateur central. Il instancie tous les systèmes dans son constructeur et 
 
 ```
 this.state          = new GameState()
+this.terrain        = new Terrain(NB_CELLS)
 this.renderer       = new Renderer(ctx)
 this.ui             = new UIManager()
-this.itemManager    = new ItemManager(NB_CELLS)
+this.itemManager    = new ItemManager(NB_CELLS, this.terrain)
 this.input          = new InputManager()
 this.score          = new ScoreManager()
 this.entities       = new EntityManager()
-this.spawnSystem    = new SpawnSystem(itemManager)
-this.collisionSystem = new CollisionSystem(itemManager, ui)
+this.spawnSystem    = new SpawnSystem(this.itemManager)
+this.collisionSystem = new CollisionSystem(this.itemManager, this.ui)
 this.ticker         = new Ticker(onTick, onRender)
 this.interactions   = new InteractionManager(systems, callbacks)
 ```
 
 ### Méthodes Principales
 
-**`startGame()`** : Réinitialise l'état, les items, la file d'entrées. Crée un nouveau serpent joueur à la position (15,15). Fait apparaître la première pomme. Démarre le Ticker.
+**`startGame()`** : Réinitialise l'état, la grille d'occupation (`Terrain`), les items et la file d'entrées. Crée un nouveau serpent joueur à la position (15,15), synchronise l'occupation, fait apparaître la première pomme, puis démarre le Ticker.
 
 **`updateLogic(timestamp)`** : Cœur de la logique cadencée. Séquence :
 
 1. Récupère la prochaine direction valide depuis `InputManager`.
 2. Applique le changement via `joueur.changeDir(nextDir)`.
 3. Boucle sur tous les serpents : déplace chacun, vérifie les collisions fatales.
-4. Gère la collecte d'items, la mise à jour du score, le spawn des IA.
-5. Nettoie les entités mortes via `EntityManager.cleanup()`.
+4. Nettoie les entités mortes via `EntityManager.cleanup()` et synchronise la grille d'occupation.
+5. Gère la collecte d'items, la mise à jour du score et le spawn des IA/powerups, puis resynchronise la grille.
 
 **`togglePause()`** : Bascule l'état de pause. Met le Ticker en pause ou le reprend. Affiche ou cache le menu pause.
 
 **`gameOver(message)`** : Arrête le Ticker, sauvegarde le score si > 0, affiche le menu de fin avec le message de mort.
 
-**`_runSystems(timestamp)`** : Méthode privée qui gère la collecte d'items pour chaque serpent, la mise à jour du score et de la difficulté, et le déclenchement du spawn d'IA et de PowerUps.
+**`_runSystems(timestamp)`** : Méthode privée qui gère la collecte d'items pour chaque serpent (avec la liste complète des serpents actifs), la mise à jour du score et de la difficulté, et le déclenchement du spawn d'IA et de PowerUps.
 
 ---
 
@@ -228,7 +230,7 @@ Gère la collection de serpents.
 
 ### 7.4 CollisionSystem.js — Le Système de Résolution des Impacts
 
-Le système le plus complexe du projet. Gère 4 types de collisions :
+Le système le plus complexe du projet. Gère les collisions fatales et la collecte d'items :
 
 **`checkFatalCollisions(s, serpents, onGameOver)`** :
 
@@ -239,10 +241,10 @@ Le système le plus complexe du projet. Gère 4 types de collisions :
 **`_handleSerpentCollision(s, autre, serpents, onGameOver, timestamp)`** :
 Gère la mécanique d'invincibilité. Si le joueur est invincible et percute une IA → l'IA est détruite avec effet de particules. Sinon → Game Over classique. Pour IA vs IA → l'attaquant meurt.
 
-**`handleItemCollection(s, joueur, itemManager, scoreState, timestamp)`** :
+**`handleItemCollection(s, serpents, joueur, itemManager, scoreState, timestamp)`** :
 Parcourt la liste des items à l'envers (pour pouvoir supprimer en parcourant). Si la tête d'un serpent est sur un item, traite l'effet.
 
-**`_handleApple()`** : Joueur mange → +1 au score, serpent s'allonge, particules vertes, nouvelle pomme générée. IA mange → -1 au score du joueur (pénalité).
+**`_handleApple()`** : Joueur mange → +1 au score, serpent s'allonge, particules vertes, nouvelle pomme générée en évitant tous les serpents actifs. IA mange → -1 au score du joueur (pénalité).
 
 **`_handlePowerUp()`** : Joueur mange → +5 au score, invincibilité pendant 8 secondes (`POWERUP_DURATION`). Serpent s'allonge, particules dorées.
 
@@ -289,7 +291,7 @@ Reçoit les références aux systèmes (`ui`, `state`, `input`, `score`) et aux 
 
 **`_initKeyboard()`** : Utilise `InputManager.registerAction()` pour lier P → Pause, I → Info, R → Restart/Relancer.
 
-**`_initMobile()`** : Configure le D-Pad. Pour chaque bouton directionnel (up/right/down/left), attache des listeners `touchstart`, `mousedown`, `touchend`, `mouseup`, `mouseleave` et `click`. Ajoute une classe CSS `is-active` pour le feedback visuel tactile. Appelle `input.addDirection(dir)` pour injecter la direction dans la file.
+**`_initMobile()`** : Configure le D-Pad. Pour chaque bouton directionnel (up/right/down/left), attache des listeners `touchstart`, `mousedown`, `touchend`, `mouseup`, `mouseleave`. Ajoute une classe CSS `is-active` pour le feedback visuel tactile. Appelle `input.addDirection(dir)` pour injecter la direction dans la file. Le fallback `click` est volontairement absent pour éviter les doubles entrées.
 
 ### 8.3 UIManager.js — Le Pilote du HUD
 
@@ -327,7 +329,7 @@ Contient deux classes : `Item` (objet sur la grille) et `ItemManager` (gestionna
 
 **Classe `ItemManager`** :
 
-- `spawnItem(type, serpents)` : Génère une position aléatoire en vérifiant les collisions avec tous les serpents et items existants (boucle do/while, max 500 tentatives).
+- `spawnItem(type, serpents)` : Génère une position aléatoire en vérifiant les collisions avec tous les serpents et items existants, ainsi qu'avec la grille d'occupation dynamique (`Terrain`) (boucle do/while, max 500 tentatives).
 - `spawnParticles(x, y, color)` : Crée 15 particules avec vélocité aléatoire, durée de vie `1.0` et décroissance variable.
 - `updateAndDraw(ctx, timeNow)` : Dessine les items puis met à jour et dessine les particules (mouvement + alpha décroissant).
 
@@ -392,7 +394,7 @@ Toutes les constantes sont centralisées ici :
 
 **Configuration gameplay** (`GAME_CONFIG`) :
 
-- `DEBUG_MODE: true` — Active les logs console colorés.
+- `DEBUG_MODE: false` — Mode debug désactivé par défaut (activable via le bouton/menu).
 - `FPS_INITIAL: 10` — Vitesse de départ (10 mouvements/seconde).
 - `FPS_MAX: 20` — Vitesse maximale.
 - `SCORE_FOR_SPEED_INCREASE: 12` — Points nécessaires pour accélérer de +1 FPS.
@@ -498,6 +500,9 @@ npm run build
 
 # Prévisualiser le build
 npm run preview
+
+# Vérifier le lint
+npm run lint
 ```
 
 ### Vérifications Rapides Avant Démo
@@ -513,7 +518,7 @@ npm run preview
 
 - Le projet est structuré de façon modulaire (moteur + systèmes + managers + entités), ce qui facilite les évolutions.
 - Les scripts de test automatisés ne sont pas encore présents dans `package.json`.
-- ESLint est installé en dépendance de dev, mais aucun script `lint` n'est actuellement exposé.
+- Un script `lint` ESLint est exposé et utilisable (`npm run lint`).
 
 ### Limites Connues
 
@@ -524,7 +529,7 @@ npm run preview
 ### Améliorations Recommandées
 
 1. Ajouter des tests unitaires ciblés pour `GameState`, `CollisionSystem` et `InputManager`.
-2. Ajouter un script `lint` et un contrôle CI simple (lint + build).
+2. Ajouter un contrôle CI simple (lint + build) sur chaque push/PR.
 3. Introduire une stratégie RNG seedée pour les sessions de test/replay.
 
 ## 16. Maintenance et Évolution

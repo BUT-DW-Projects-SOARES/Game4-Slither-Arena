@@ -116,17 +116,26 @@ export default class CollisionSystem {
   /**
    * Gère la collecte d'items (pommes, powerups) par les serpents.
    * @param {Serpent} s - Le serpent qui collecte.
+   * @param {Serpent[]} serpents - Liste des serpents actifs.
    * @param {Serpent} joueur - Le joueur (pour le score).
    * @param {ItemManager} itemManager - Gestionnaire des items.
    * @param {Object} scoreState - État du score à mettre à jour.
    * @param {number} timestamp - Temps actuel.
    */
-  handleItemCollection(s, joueur, itemManager, scoreState, timestamp) {
+  handleItemCollection(
+    s,
+    serpents,
+    joueur,
+    itemManager,
+    scoreState,
+    timestamp,
+  ) {
     for (let i = itemManager.items.length - 1; i >= 0; i--) {
       const item = itemManager.items[i];
       if (s.anneaux[0].i === item.i && s.anneaux[0].j === item.j) {
         this._processItem(
           s,
+          serpents,
           joueur,
           item,
           itemManager,
@@ -142,9 +151,26 @@ export default class CollisionSystem {
    * Traite l'application de l'effet d'un item collecté.
    * @private
    */
-  _processItem(s, joueur, item, itemManager, scoreState, index, timestamp) {
+  _processItem(
+    s,
+    serpents,
+    joueur,
+    item,
+    itemManager,
+    scoreState,
+    index,
+    timestamp,
+  ) {
     if (item.type === 'apple') {
-      this._handleApple(s, joueur, item, itemManager, scoreState, index);
+      this._handleApple(
+        s,
+        serpents,
+        joueur,
+        item,
+        itemManager,
+        scoreState,
+        index,
+      );
     } else if (item.type === 'powerup') {
       this._handlePowerUp(
         s,
@@ -162,7 +188,7 @@ export default class CollisionSystem {
    * Gère la collecte d'une pomme.
    * @private
    */
-  _handleApple(s, joueur, item, itemManager, scoreState, index) {
+  _handleApple(s, serpents, joueur, item, itemManager, scoreState, index) {
     if (s === joueur) {
       scoreState.score += GAME_CONFIG.SCORE_APPLE;
       if (GAME_CONFIG.DEBUG_MODE)
@@ -185,7 +211,7 @@ export default class CollisionSystem {
     s.extend();
     itemManager.spawnParticles(item.i, item.j, COLORS.apple);
     itemManager.items.splice(index, 1);
-    itemManager.spawnItem('apple', [joueur]);
+    itemManager.spawnItem('apple', serpents);
   }
 
   /**
