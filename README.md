@@ -2,6 +2,10 @@
 
 Slither Arena est un jeu web de type Snake développé en **JavaScript ES2022+** avec l'API **HTML5 Canvas** et **Vite**. Le projet met en œuvre une architecture modulaire orientée objet avec système d'IA, gestion de collisions avancée, et une interface responsive compatible mobile.
 
+# ⚡ Live Demo
+
+https://soares.etu.mmi-unistra.fr/Game4-Slither-Arena/
+
 ## 🎮 Fonctionnalités
 
 - **Architecture Modulaire** : Moteur (`GameEngine`) orchestrant des systèmes spécialisés indépendants.
