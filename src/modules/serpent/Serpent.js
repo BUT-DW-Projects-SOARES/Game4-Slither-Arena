@@ -1,5 +1,5 @@
-import Anneau from "./Anneau.js";
-import { COLORS, NB_CELLS } from "../../constants.js";
+import Anneau from './Anneau.js';
+import { COLORS, NB_CELLS } from '../../constants.js';
 
 /**
  * Entité représentant un serpent sur la grille.
@@ -171,12 +171,12 @@ export default class Serpent {
     }
 
     // Blanc des yeux
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = COLORS.eyeWhite;
     this._fillCircle(ctx, e1x, e1y, eyeRadius);
     this._fillCircle(ctx, e2x, e2y, eyeRadius);
 
     // Pupilles
-    ctx.fillStyle = "#111827";
+    ctx.fillStyle = COLORS.eyePupil;
     this._fillCircle(ctx, e1x, e1y, eyeRadius * 0.5);
     this._fillCircle(ctx, e2x, e2y, eyeRadius * 0.5);
   }

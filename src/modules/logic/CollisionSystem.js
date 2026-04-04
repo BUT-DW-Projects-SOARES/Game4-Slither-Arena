@@ -1,4 +1,4 @@
-import { NB_CELLS, COLORS, GAME_CONFIG } from "../../constants.js";
+import { NB_CELLS, COLORS, GAME_CONFIG, LOG_COLORS } from '../../constants.js';
 
 /**
  * Système de gestion des collisions.
@@ -27,14 +27,14 @@ export default class CollisionSystem {
   checkFatalCollisions(s, serpents, onGameOver) {
     // 1. Collision avec les limites de la grille (Murs)
     if (s.checkWallCollision(NB_CELLS)) {
-      if (s === serpents[0]) onGameOver("Vous avez percuté un mur !");
+      if (s === serpents[0]) onGameOver('Vous avez percuté un mur !');
       else s.dead = true;
       return true;
     }
 
     // 2. Collision avec son propre corps (Auto-morsure)
     if (s.checkSelfCollision()) {
-      if (s === serpents[0]) onGameOver("Vous vous êtes mordu !");
+      if (s === serpents[0]) onGameOver('Vous vous êtes mordu !');
       else s.dead = true;
       return true;
     }
@@ -75,7 +75,7 @@ export default class CollisionSystem {
         this._destroyIA(autre);
         return false;
       } else {
-        onGameOver("Vous avez percuté un autre serpent !");
+        onGameOver('Vous avez percuté un autre serpent !');
         return true;
       }
     } else if (autre === joueur) {
@@ -83,7 +83,7 @@ export default class CollisionSystem {
         this._destroyIA(s);
         return true;
       } else {
-        onGameOver("Un serpent vous a percuté !");
+        onGameOver('Un serpent vous a percuté !');
         return true;
       }
     } else {
@@ -100,7 +100,10 @@ export default class CollisionSystem {
    */
   _destroyIA(ia) {
     if (GAME_CONFIG.DEBUG_MODE) {
-      console.info("%c[COLLISION] IA détruite !", "color: #fbbf24;");
+      console.info(
+        '%c[COLLISION] IA détruite !',
+        `color: ${LOG_COLORS.collision};`,
+      );
     }
     ia.dead = true;
     this.itemManager.spawnParticles(
@@ -140,9 +143,9 @@ export default class CollisionSystem {
    * @private
    */
   _processItem(s, joueur, item, itemManager, scoreState, index, timestamp) {
-    if (item.type === "apple") {
+    if (item.type === 'apple') {
       this._handleApple(s, joueur, item, itemManager, scoreState, index);
-    } else if (item.type === "powerup") {
+    } else if (item.type === 'powerup') {
       this._handlePowerUp(
         s,
         joueur,
@@ -163,20 +166,26 @@ export default class CollisionSystem {
     if (s === joueur) {
       scoreState.score += GAME_CONFIG.SCORE_APPLE;
       if (GAME_CONFIG.DEBUG_MODE)
-        console.log("%c[ITEM] Pomme mangée (+1)", "color: #4ade80;");
+        console.log(
+          '%c[ITEM] Pomme mangée (+1)',
+          `color: ${LOG_COLORS.itemApple};`,
+        );
     } else {
       scoreState.score = Math.max(
         0,
         scoreState.score + GAME_CONFIG.SCORE_AI_PENALTY,
       );
       if (GAME_CONFIG.DEBUG_MODE)
-        console.warn("%c[ITEM] AI a volé une pomme (-1)", "color: #ef4444;");
+        console.warn(
+          '%c[ITEM] AI a volé une pomme (-1)',
+          `color: ${LOG_COLORS.itemPenalty};`,
+        );
     }
 
     s.extend();
     itemManager.spawnParticles(item.i, item.j, COLORS.apple);
     itemManager.items.splice(index, 1);
-    itemManager.spawnItem("apple", [joueur]);
+    itemManager.spawnItem('apple', [joueur]);
   }
 
   /**
@@ -189,8 +198,8 @@ export default class CollisionSystem {
       joueur.invincibleUntil = timestamp + GAME_CONFIG.POWERUP_DURATION;
       if (GAME_CONFIG.DEBUG_MODE) {
         console.info(
-          "%c[ITEM] POWERUP ACTIVÉ ! (Invincibilité 8s)",
-          "color: #fbbf24; font-weight: bold;",
+          '%c[ITEM] POWERUP ACTIVÉ ! (Invincibilité 8s)',
+          `color: ${LOG_COLORS.powerup}; font-weight: bold;`,
         );
       }
     }

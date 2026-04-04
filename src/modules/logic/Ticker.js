@@ -1,4 +1,4 @@
-import { GAME_CONFIG } from "../../constants.js";
+import { GAME_CONFIG } from '../../constants.js';
 
 /**
  * Gère la boucle de rendu et la cadence de mise à jour (Tick).

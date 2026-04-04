@@ -6,14 +6,14 @@ export default class ScoreManager {
   /**
    * @param {string} storageKey - La clé de stockage localStorage.
    */
-  constructor(storageKey = "slither_arena_scores") {
+  constructor(storageKey = 'slither_arena_scores') {
     /** @type {string} Clé unique pour le localStorage */
     this.STORAGE_KEY = storageKey;
 
     /** @type {HTMLElement|null} Liste HTML du scoreboard */
-    this.scoreboardList = document.getElementById("scoreboard-list");
+    this.scoreboardList = document.getElementById('scoreboard-list');
     /** @type {HTMLElement|null} Overlay du scoreboard */
-    this.scoreboardOverlay = document.getElementById("scoreboard-overlay");
+    this.scoreboardOverlay = document.getElementById('scoreboard-overlay');
   }
 
   /**
@@ -26,7 +26,7 @@ export default class ScoreManager {
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
-      console.error("Erreur lors de la récupération des scores :", error);
+      console.error('Erreur lors de la récupération des scores :', error);
       return [];
     }
   }
@@ -41,12 +41,12 @@ export default class ScoreManager {
     const scores = this.getScores();
     scores.push({
       score: value,
-      date: new Date().toLocaleString("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+      date: new Date().toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       }),
     });
 
@@ -58,7 +58,7 @@ export default class ScoreManager {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(scores));
     } catch (e) {
       console.warn(
-        "Impossible de sauvegarder le score dans le localStorage :",
+        'Impossible de sauvegarder le score dans le localStorage :',
         e,
       );
     }
@@ -79,7 +79,7 @@ export default class ScoreManager {
     if (!this.scoreboardList) return;
 
     const scores = this.getScores();
-    this.scoreboardList.innerHTML = "";
+    this.scoreboardList.innerHTML = '';
 
     if (scores.length === 0) {
       this.scoreboardList.innerHTML =
@@ -101,7 +101,7 @@ export default class ScoreManager {
    * @private
    */
   _createScoreElement(entry, index) {
-    const li = document.createElement("li");
+    const li = document.createElement('li');
     li.innerHTML = `
       <span class="rank">#${index + 1}</span>
       <span class="score-date">${entry.date}</span>
@@ -115,13 +115,13 @@ export default class ScoreManager {
    */
   show() {
     this.renderScoreboard();
-    this.scoreboardOverlay?.classList.remove("hidden");
+    this.scoreboardOverlay?.classList.remove('hidden');
   }
 
   /**
    * Masque l'overlay du scoreboard.
    */
   hide() {
-    this.scoreboardOverlay?.classList.add("hidden");
+    this.scoreboardOverlay?.classList.add('hidden');
   }
 }

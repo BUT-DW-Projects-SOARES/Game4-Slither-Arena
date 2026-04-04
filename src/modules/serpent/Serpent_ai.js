@@ -1,9 +1,9 @@
-import Serpent from "./Serpent.js";
+import Serpent from './Serpent.js';
 import {
   NB_CELLS,
   COLORS as GAME_COLORS,
   GAME_CONFIG,
-} from "../../constants.js";
+} from '../../constants.js';
 
 /**
  * Sous-classe représentant un serpent piloté par ordinateur (IA).
@@ -129,7 +129,7 @@ export default class SerpentAI extends Serpent {
    * @private
    */
   _findNearestItem(tete, items) {
-    const powerUps = items.filter((it) => it.type === "powerup");
+    const powerUps = items.filter((it) => it.type === 'powerup');
     const targets = powerUps.length > 0 ? powerUps : items;
     let nearest = null;
     let minDist = Infinity;

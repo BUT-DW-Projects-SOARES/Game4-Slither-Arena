@@ -213,7 +213,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  font-family: "Outfit", system-ui, sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   color: var(--text);
 }
 
@@ -441,7 +441,7 @@ kbd {
   min-width: 24px;
   height: 24px;
   padding: 0 6px;
-  font-family: "Outfit", sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--text);
@@ -457,7 +457,7 @@ kbd {
   display: block;
   margin: 0 auto;
   padding: 16px 48px;
-  font-family: "Outfit", sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
   background: var(--primary);
@@ -504,7 +504,7 @@ kbd {
 .btn-secondary {
   margin-top: 1rem;
   padding: 8px 20px;
-  font-family: "Outfit", sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
   background: transparent;
@@ -518,6 +518,11 @@ kbd {
 .btn-secondary:hover {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+.btn-confirm {
+  padding: 12px 24px;
+  font-size: 1rem;
 }
 
 /* --- Scoreboard Overlay --- */
@@ -557,6 +562,11 @@ kbd {
   max-width: 420px;
   box-shadow: 0 16px 48px var(--shadow-lg);
   text-align: center;
+}
+
+.overlay-card.info-card {
+  max-width: 500px;
+  text-align: left;
 }
 
 .overlay-header {
@@ -670,6 +680,16 @@ kbd {
 
 .info-list li:last-child {
   border-bottom: none;
+}
+
+.accent-strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.powerup-strong {
+  color: var(--canvas-powerup);
+  font-weight: 700;
 }
 
 /* --- Fullscreen support --- */

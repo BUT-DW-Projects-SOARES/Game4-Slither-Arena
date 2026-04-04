@@ -10,14 +10,38 @@ const styles = getComputedStyle(document.documentElement);
  * @type {Object}
  */
 export const COLORS = {
-  snakeHead: styles.getPropertyValue("--canvas-snake-head").trim() || "#16a34a",
-  snakeBody: styles.getPropertyValue("--canvas-snake-body").trim() || "#4ade80",
-  snakeTail: styles.getPropertyValue("--canvas-snake-tail").trim() || "#86efac",
-  apple: styles.getPropertyValue("--canvas-apple").trim() || "#f43f5e",
-  redIA: styles.getPropertyValue("--canvas-ia").trim() || "#ef4444",
-  redIABody: styles.getPropertyValue("--canvas-ia-body").trim() || "#991b1b",
-  powerup: styles.getPropertyValue("--canvas-powerup").trim() || "#fbbf24",
-  canvasGrid: styles.getPropertyValue("--canvas-grid").trim() || "#000000",
+  snakeHead: styles.getPropertyValue('--canvas-snake-head').trim() || '#16a34a',
+  snakeBody: styles.getPropertyValue('--canvas-snake-body').trim() || '#4ade80',
+  snakeTail: styles.getPropertyValue('--canvas-snake-tail').trim() || '#86efac',
+  apple: styles.getPropertyValue('--canvas-apple').trim() || '#f43f5e',
+  redIA: styles.getPropertyValue('--canvas-ia').trim() || '#ef4444',
+  redIABody: styles.getPropertyValue('--canvas-ia-body').trim() || '#991b1b',
+  powerup: styles.getPropertyValue('--canvas-powerup').trim() || '#fbbf24',
+  canvasGrid: styles.getPropertyValue('--canvas-grid').trim() || '#000000',
+  eyeWhite: styles.getPropertyValue('--canvas-eye-white').trim() || '#ffffff',
+  eyePupil: styles.getPropertyValue('--canvas-eye-pupil').trim() || '#111827',
+};
+
+/**
+ * Couleurs d'interface utilisées côté JavaScript (boutons, etc.).
+ * @type {Object}
+ */
+export const UI_COLORS = {
+  debugButtonOn: styles.getPropertyValue('--ui-debug-on').trim() || '#10b981',
+  debugButtonOff: styles.getPropertyValue('--ui-debug-off').trim() || '#ef4444',
+};
+
+/**
+ * Couleurs des messages de logs techniques (%c) côté JavaScript.
+ * @type {Object}
+ */
+export const LOG_COLORS = {
+  debug: styles.getPropertyValue('--ui-log-debug').trim() || '#3b82f6',
+  spawn: COLORS.powerup,
+  collision: COLORS.powerup,
+  itemApple: COLORS.snakeBody,
+  itemPenalty: COLORS.redIA,
+  powerup: COLORS.powerup,
 };
 
 /**
@@ -25,7 +49,7 @@ export const COLORS = {
  * @type {Object}
  */
 export const GAME_CONFIG = {
-  DEBUG_MODE: true,
+  DEBUG_MODE: false,
   FPS_INITIAL: 10,
   FPS_MAX: 20,
   SCORE_FOR_SPEED_INCREASE: 12,

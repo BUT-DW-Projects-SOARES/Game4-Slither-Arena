@@ -1,3 +1,5 @@
+import { UI_COLORS } from '../../constants.js';
+
 /**
  * Service de gestion de l'interface utilisateur (HUD, Menus, Modaux).
  * Centralise toutes les manipulations directes du DOM et les mises à jour d'affichage.
@@ -9,40 +11,40 @@ export default class UIManager {
   constructor() {
     // HUD Elements
     /** @type {HTMLElement|null} */
-    this.scoreValElem = document.getElementById("score-val");
+    this.scoreValElem = document.getElementById('score-val');
     /** @type {HTMLElement|null} */
-    this.speedValElem = document.getElementById("speed-val");
+    this.speedValElem = document.getElementById('speed-val');
 
     // Menu Elements
     /** @type {HTMLElement|null} */
-    this.menuOverlay = document.getElementById("game-menu-overlay");
+    this.menuOverlay = document.getElementById('game-menu-overlay');
     /** @type {HTMLElement|null} */
-    this.menuTitle = document.getElementById("menu-title");
+    this.menuTitle = document.getElementById('menu-title');
     /** @type {HTMLElement|null} */
-    this.menuSubtitle = document.getElementById("menu-subtitle");
+    this.menuSubtitle = document.getElementById('menu-subtitle');
     /** @type {HTMLElement|null} */
-    this.menuScoreDisplay = document.getElementById("menu-score-display");
+    this.menuScoreDisplay = document.getElementById('menu-score-display');
     /** @type {HTMLElement|null} */
-    this.menuScoreVal = document.getElementById("menu-score-val");
+    this.menuScoreVal = document.getElementById('menu-score-val');
     /** @type {HTMLElement|null} */
-    this.menuActionBtn = document.getElementById("menu-action-btn");
+    this.menuActionBtn = document.getElementById('menu-action-btn');
     /** @type {HTMLElement|null} */
-    this.menuRestartBtn = document.getElementById("menu-restart-btn");
+    this.menuRestartBtn = document.getElementById('menu-restart-btn');
     /** @type {HTMLElement|null} */
-    this.menuDebugBtn = document.getElementById("menu-debug-btn");
+    this.menuDebugBtn = document.getElementById('menu-debug-btn');
 
     // Modal Elements
     /** @type {HTMLElement|null} */
-    this.confirmOverlay = document.getElementById("confirm-modal");
+    this.confirmOverlay = document.getElementById('confirm-modal');
     /** @type {HTMLElement|null} */
-    this.confirmYesBtn = document.getElementById("confirm-yes-btn");
+    this.confirmYesBtn = document.getElementById('confirm-yes-btn');
     /** @type {HTMLElement|null} */
-    this.confirmNoBtn = document.getElementById("confirm-no-btn");
+    this.confirmNoBtn = document.getElementById('confirm-no-btn');
 
     /** @type {HTMLElement|null} */
-    this.infoOverlay = document.getElementById("info-modal");
+    this.infoOverlay = document.getElementById('info-modal');
     /** @type {HTMLElement|null} */
-    this.infoCloseBtn = document.getElementById("info-close");
+    this.infoCloseBtn = document.getElementById('info-close');
   }
 
   /**
@@ -55,7 +57,7 @@ export default class UIManager {
       this.scoreValElem.textContent = score;
     }
     if (this.speedValElem) {
-      this.speedValElem.textContent = (fps / 10).toFixed(1) + "x";
+      this.speedValElem.textContent = (fps / 10).toFixed(1) + 'x';
     }
   }
 
@@ -75,7 +77,7 @@ export default class UIManager {
     subtitle,
     showScore = false,
     score = 0,
-    btnText = "Rejouer",
+    btnText = 'Rejouer',
     showRestart = false,
     showDebug = false,
   }) {
@@ -91,14 +93,14 @@ export default class UIManager {
     this._toggleElement(this.menuDebugBtn, showDebug);
     this._toggleElement(this.menuRestartBtn, showRestart);
 
-    this.menuOverlay?.classList.remove("hidden");
+    this.menuOverlay?.classList.remove('hidden');
   }
 
   /**
    * Masque l'overlay du menu.
    */
   hideMenu() {
-    this.menuOverlay?.classList.add("hidden");
+    this.menuOverlay?.classList.add('hidden');
   }
 
   /**
@@ -107,7 +109,7 @@ export default class UIManager {
    */
   isMenuVisible() {
     return this.menuOverlay
-      ? !this.menuOverlay.classList.contains("hidden")
+      ? !this.menuOverlay.classList.contains('hidden')
       : false;
   }
 
@@ -115,28 +117,28 @@ export default class UIManager {
    * Affiche le popup de confirmation (Quitter le jeu).
    */
   showConfirm() {
-    this.confirmOverlay?.classList.remove("hidden");
+    this.confirmOverlay?.classList.remove('hidden');
   }
 
   /**
    * Masque le popup de confirmation.
    */
   hideConfirm() {
-    this.confirmOverlay?.classList.add("hidden");
+    this.confirmOverlay?.classList.add('hidden');
   }
 
   /**
    * Affiche l'écran d'information (Commandes & Aide).
    */
   showInfo() {
-    this.infoOverlay?.classList.remove("hidden");
+    this.infoOverlay?.classList.remove('hidden');
   }
 
   /**
    * Masque l'écran d'information.
    */
   hideInfo() {
-    this.infoOverlay?.classList.add("hidden");
+    this.infoOverlay?.classList.add('hidden');
   }
 
   /**
@@ -147,13 +149,13 @@ export default class UIManager {
     if (!this.menuDebugBtn) return;
 
     if (active) {
-      this.menuDebugBtn.classList.add("active");
-      this.menuDebugBtn.textContent = "Debug: ON";
-      this.menuDebugBtn.style.backgroundColor = "#10b981"; // Émeraude
+      this.menuDebugBtn.classList.add('active');
+      this.menuDebugBtn.textContent = 'Debug: ON';
+      this.menuDebugBtn.style.backgroundColor = UI_COLORS.debugButtonOn;
     } else {
-      this.menuDebugBtn.classList.remove("active");
-      this.menuDebugBtn.textContent = "Debug: OFF";
-      this.menuDebugBtn.style.backgroundColor = "#ef4444"; // Rose/Rouge
+      this.menuDebugBtn.classList.remove('active');
+      this.menuDebugBtn.textContent = 'Debug: OFF';
+      this.menuDebugBtn.style.backgroundColor = UI_COLORS.debugButtonOff;
     }
   }
 
@@ -166,9 +168,9 @@ export default class UIManager {
   _toggleElement(element, visible) {
     if (!element) return;
     if (visible) {
-      element.classList.remove("hidden");
+      element.classList.remove('hidden');
     } else {
-      element.classList.add("hidden");
+      element.classList.add('hidden');
     }
   }
 }

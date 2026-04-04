@@ -1,17 +1,17 @@
-import Serpent from "./serpent/Serpent.js";
-import SerpentAI from "./serpent/Serpent_ai.js";
-import ItemManager from "./manager/ItemManager.js";
-import InputManager from "./manager/InputManager.js";
-import ScoreManager from "./manager/ScoreManager.js";
-import UIManager from "./manager/UIManager.js";
-import InteractionManager from "./manager/InteractionManager.js";
-import SpawnSystem from "./logic/SpawnSystem.js";
-import CollisionSystem from "./logic/CollisionSystem.js";
-import GameState from "./logic/GameState.js";
-import Renderer from "./logic/Renderer.js";
-import Ticker from "./logic/Ticker.js";
-import EntityManager from "./logic/EntityManager.js";
-import { GAME_CONFIG, NB_CELLS } from "../constants.js";
+import Serpent from './serpent/Serpent.js';
+import SerpentAI from './serpent/Serpent_ai.js';
+import ItemManager from './manager/ItemManager.js';
+import InputManager from './manager/InputManager.js';
+import ScoreManager from './manager/ScoreManager.js';
+import UIManager from './manager/UIManager.js';
+import InteractionManager from './manager/InteractionManager.js';
+import SpawnSystem from './logic/SpawnSystem.js';
+import CollisionSystem from './logic/CollisionSystem.js';
+import GameState from './logic/GameState.js';
+import Renderer from './logic/Renderer.js';
+import Ticker from './logic/Ticker.js';
+import EntityManager from './logic/EntityManager.js';
+import { GAME_CONFIG, LOG_COLORS, NB_CELLS } from '../constants.js';
 
 /**
  * Orchestrateur central de Slither Arena.
@@ -23,7 +23,10 @@ export default class GameEngine {
    */
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext("2d");
+    this.ctx = canvas.getContext('2d');
+    if (!this.ctx) {
+      throw new Error("Impossible d'initialiser le contexte 2D du canvas.");
+    }
 
     // 1. Initialisation des Systèmes
     this.state = new GameState();
@@ -56,8 +59,17 @@ export default class GameEngine {
         onStart: () => this.startGame(),
         onTogglePause: () => this.togglePause(),
         onRestartRequest: () => this.ui.showConfirm(),
+        onToggleDebug: () => this.toggleDebug(),
       },
     );
+  }
+
+  /**
+   * Active/désactive le mode debug et synchronise le bouton d'interface.
+   */
+  toggleDebug() {
+    GAME_CONFIG.DEBUG_MODE = !GAME_CONFIG.DEBUG_MODE;
+    this.ui.updateDebugButton(GAME_CONFIG.DEBUG_MODE);
   }
 
   /**
@@ -83,11 +95,11 @@ export default class GameEngine {
     if (this.state.isPaused) {
       this.ticker.pause();
       this.ui.showMenu({
-        title: "PAUSE",
-        subtitle: "Session suspendue",
+        title: 'PAUSE',
+        subtitle: 'Session suspendue',
         showScore: true,
         score: this.state.score,
-        btnText: "Reprendre",
+        btnText: 'Reprendre',
         showRestart: true,
         showDebug: true,
       });
@@ -109,11 +121,11 @@ export default class GameEngine {
     }
 
     this.ui.showMenu({
-      title: "Fin de Partie",
+      title: 'Fin de Partie',
       subtitle: message,
       showScore: true,
       score: this.state.score,
-      btnText: "Réessayer",
+      btnText: 'Réessayer',
       showDebug: true,
     });
   }
@@ -139,7 +151,10 @@ export default class GameEngine {
         this.entities.serpents,
         (msg) => this.gameOver(msg),
       );
-      if (dead) return;
+      if (dead) {
+        if (!this.state.gameRunning || s === this.entities.joueur) return;
+        continue;
+      }
     }
 
     // 3. Collectes, Difficulté et Spawns
@@ -193,7 +208,7 @@ export default class GameEngine {
   _logDebug() {
     console.group(
       `%c[DEBUG] Game State @ ${new Date().toLocaleTimeString()}`,
-      "color: #3b82f6; font-weight: bold;",
+      `color: ${LOG_COLORS.debug}; font-weight: bold;`,
     );
     console.log(
       `Score: ${this.state.score} | FPS: ${this.state.fps.toFixed(1)}`,
@@ -205,7 +220,7 @@ export default class GameEngine {
     const aiStates = this.entities.getAIs().map((s, idx) => ({
       id: idx + 1,
       pos: `[${s.anneaux[0].i},${s.anneaux[0].j}]`,
-      behavior: s.isHunting ? "HUNT" : s.isRushing ? "RUSH" : "Wander",
+      behavior: s.isHunting ? 'HUNT' : s.isRushing ? 'RUSH' : 'Wander',
     }));
 
     if (aiStates.length > 0) console.table(aiStates);

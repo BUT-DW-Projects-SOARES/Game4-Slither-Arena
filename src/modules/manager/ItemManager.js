@@ -1,5 +1,5 @@
-import { COLORS, TAILLE_CELLULE } from "../../constants.js";
-import { getRandomInt } from "../../utils.js";
+import { COLORS, TAILLE_CELLULE } from '../../constants.js';
+import { getRandomInt } from '../../utils.js';
 
 /**
  * Représente un objet ramassable sur la grille (Pomme, PowerUp, etc.).
@@ -28,9 +28,9 @@ export class Item {
     const cx = this.i * TAILLE_CELLULE + TAILLE_CELLULE / 2;
     const cy = this.j * TAILLE_CELLULE + TAILLE_CELLULE / 2;
 
-    if (this.type === "apple") {
+    if (this.type === 'apple') {
       this._drawApple(ctx, cx, cy, timeNow);
-    } else if (this.type === "powerup") {
+    } else if (this.type === 'powerup') {
       this._drawPowerUp(ctx, cx, cy, timeNow);
     }
   }

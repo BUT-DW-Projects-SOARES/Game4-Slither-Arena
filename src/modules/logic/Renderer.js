@@ -1,4 +1,4 @@
-import { COLORS, TAILLE_CELLULE, CSS_SIZE } from "../../constants.js";
+import { COLORS, TAILLE_CELLULE, CSS_SIZE } from '../../constants.js';
 
 /**
  * Gère le rendu graphique complet du jeu sur le canvas.

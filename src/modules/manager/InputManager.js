@@ -57,7 +57,7 @@ export default class InputManager {
    * @private
    */
   _setupListeners() {
-    window.addEventListener("keydown", (event) => {
+    window.addEventListener('keydown', (event) => {
       const key = event.key.toLowerCase();
 
       // 1. Gestion des directions

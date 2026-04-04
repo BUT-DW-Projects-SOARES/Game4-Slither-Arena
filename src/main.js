@@ -1,6 +1,6 @@
-import "./style.css";
-import GameEngine from "./modules/GameEngine.js";
-import { CSS_SIZE, GAME_CONFIG } from "./constants.js";
+import './style.css';
+import GameEngine from './modules/GameEngine.js';
+import { CSS_SIZE, GAME_CONFIG } from './constants.js';
 
 /**
  * Point d'entrée principal de Slither Arena.
@@ -8,8 +8,15 @@ import { CSS_SIZE, GAME_CONFIG } from "./constants.js";
  */
 
 // --- Configuration du Rendu ---
-const canvas = document.getElementById("terrain");
-const gameWrapper = document.getElementById("game-wrapper");
+const canvas = document.getElementById('terrain');
+const gameWrapper = document.getElementById('game-wrapper');
+
+if (!(canvas instanceof HTMLCanvasElement)) {
+  throw new Error('Canvas #terrain introuvable ou invalide.');
+}
+if (!gameWrapper) {
+  throw new Error('Conteneur #game-wrapper introuvable.');
+}
 
 // Gestion de la densité de pixels pour un rendu net sur tous les écrans
 const dpr = window.devicePixelRatio || 1;
@@ -27,8 +34,8 @@ engine.ctx.scale(dpr, dpr);
 /**
  * Raccourci clavier pour le mode plein écran (F11).
  */
-window.addEventListener("keydown", (event) => {
-  if (event.key === "F11") {
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'F11') {
     event.preventDefault();
     if (!document.fullscreenElement) {
       gameWrapper.requestFullscreen().catch((err) => {
@@ -44,8 +51,8 @@ window.addEventListener("keydown", (event) => {
 
 // Affichage du menu d'accueil
 engine.ui.showMenu({
-  title: "Slither Arena",
-  subtitle: "Prêt à relever le défi ?",
+  title: 'Slither Arena',
+  subtitle: 'Prêt à relever le défi ?',
   showScore: false,
   btnText: "Démarrer l'Aventure",
   showInput: false,
