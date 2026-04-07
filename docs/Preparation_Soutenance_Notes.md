@@ -38,6 +38,12 @@ Ce document regroupe les points clés de la préparation effectuée avec l'équi
 *   **Méthode `.some()`** : Utilisée dans `checkCollisionWith`.
 *   **Technique** : Elle "court-circuite" (s'arrête) dès qu'elle trouve une collision, ce qui est plus performant qu'une boucle `forEach` qui parcourrait tout le corps inutilement.
 
+### 5. Système de Debugging et Monitoring
+*   **Console Avancée** : Utilisation de `console.group()` avec style CSS (`%c`) et `console.table()` pour la lisibilité des données techniques.
+*   **Visibilité IA** : Permet de voir en temps réel l'état interne de chaque IA (HUNT, RUSH, Wander) et ses coordonnées exactes.
+*   **Équilibrage** : Outil indispensable pour ajuster la difficulté (FPS, probabilités de mouvement) sans "jouer à l'aveugle".
+*   **Toggle UI** : Intégré à l'interface de pause, ce qui montre un souci de l'expérience développeur (DX).
+
 ---
 
 ## 🚀 Méthodologie Agile & IA
